@@ -1,5 +1,5 @@
 
-_SEM_Apprentice is the property of the authors and owners of SEM_Apprentice (Anudha Mittal) and may not be distributed, copied, sold, or used without the express consent from them.  By using and/or possessing SEM_Apprentice code, you acknowledge and agree to these terms.  Copyright March 15, 2023_
+_SEM_Apprentice is the property of the authors and owners of SEM_Apprentice (Anudha Mittal and David Choi) and may not be distributed, copied, sold, or used without the express consent from them.  By using and/or possessing SEM_Apprentice code, you acknowledge and agree to these terms.  Copyright March 15, 2023_
 
 __WELCOME TO SEM_APPRENTICE!__
 
@@ -43,4 +43,4 @@ You have the right to not release to us any or all data recorded.
 7. To terminate SEM_Apprentice, move your mouse to the TOP LEFT corner of the screen and scroll.  A dialog box will appear asking you to confirm that you want to stop.
 8. Click "Yes."  SEM_Apprentice will have terminated.
 
-_SEM_Apprentice is the property of the authors and owners of SEM_Apprentice (Anudha Mittal) and may not be distributed, copied, sold, or used without the express consent from them.  By using and/or possessing SEM_Apprentice code, you acknowledge and agree to these terms.  Copyright March 15, 2023_
+_SEM_Apprentice is the property of the authors and owners of SEM_Apprentice (Anudha Mittal and David Choi) and may not be distributed, copied, sold, or used without the express consent from them.  By using and/or possessing SEM_Apprentice code, you acknowledge and agree to these terms.  Copyright March 15, 2023_
