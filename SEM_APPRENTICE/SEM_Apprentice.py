@@ -13,6 +13,8 @@ import logging
 from tkinter import messagebox
 import tkinter as tk
 import pyautogui
+import d3dshot
+import dxcam
 import cv2
 import numpy as np
 from pynput import mouse
