@@ -18,6 +18,7 @@ import numpy as np
 from pynput import mouse
 from pynput import keyboard
 
+
 # get the current directory path
 #__file__= r'C:\Users\...'
 # username = os.getlogin()
@@ -73,6 +74,31 @@ class MachineOperations:
         else:
             print(f"Directory {path_to_dir} already exists.")
 
+
+class UIOperations:
+    def yesno(self, title, question):
+        """Gives a Yes/No popup dialog box that stays on top of everything else on the screen always and doesn't close until you click yes or no"""
+        root = tk.Tk()
+        root.withdraw()
+        root.focus_set() # Set the messagebox as the top window
+        root.attributes('-topmost', True)  # keep window on top of others
+        response = messagebox.askyesno(title, question)
+        root.destroy()  # destroy the root window
+        return response
+
+# Create a custom Formatter that captures the entire log message in a variable
+class MyFormatter(logging.Formatter):
+    def __init__(self, fmt=None, datefmt=None, style='%'):
+        super().__init__(fmt=fmt, datefmt=datefmt, style=style)
+        # self.log_message = None
+        self.timestamp = None
+
+    def format(self, record):
+        # self.log_message = super().format(record)
+        self.timestamp = self.formatTime(record, self.datefmt)
+        return super().format(record)
+    
+
 def build_directories():
     
     # get sorted list of all SEMBot Directories to build
@@ -109,7 +135,7 @@ def snap_and_save(signal, detail, mode):
     # log message
     logging.info(message)
 
-    log_message = formatter.log_message
+    # log_message = formatter.log_message
 
     # format filename
     raw_timestamp = formatter.timestamp
@@ -163,66 +189,48 @@ def on_scroll(x, y, dx, dy):
         lock = False  # if chose 'No', then change lock to False and continue logging
 
 
-class UIOperations:
-    def yesno(self, title, question):
-        """Gives a Yes/No popup dialog box that stays on top of everything else on the screen always and doesn't close until you click yes or no"""
-        root = tk.Tk()
-        root.withdraw()
-        root.focus_set() # Set the messagebox as the top window
-        root.attributes('-topmost', True)  # keep window on top of others
-        response = messagebox.askyesno(title, question)
-        root.destroy()  # destroy the root window
-        return response
-
-# Create a custom Formatter that captures the entire log message in a variable
-class MyFormatter(logging.Formatter):
-    def __init__(self, fmt=None, datefmt=None, style='%'):
-        super().__init__(fmt=fmt, datefmt=datefmt, style=style)
-        self.log_message = None
-        self.timestamp = None
-
-    def format(self, record):
-        self.log_message = super().format(record)
-        self.timestamp = self.formatTime(record, self.datefmt)
-        return super().format(record)
-
-
-
-    
-# global variable to prevent multiple message boxes from being displayed at once
-lock = False  
-
+# Set constants
+start_message = "SEM Apprentice activated!"
+end_message = "SEM Apprentice terminated."
 
 """EXECUTABLES BELOW"""
-# 1. Get User Confirmation to Begin Recording
-start_record = UIOperations().yesno('START RECORDING?', 'Hello!  Should I start recording?')
+# Check Directories if present, if not, create them
+build_directories()
 
-# If user confirms to begin recording...
-if start_record:
+# Activate Logger (using the custom Formatter to later store created log message to variable)
+# mode 'a' means append new log messages; mode 'w' means 'write' rather rewrite new log messages (previous messages are overwritten)
+formatter = MyFormatter(fmt='%(asctime)s: %(message)s')
+path_to_logfile = PathOperations().create_path_string(FullPathElements.F1_LOGS + [FileNames().FN_LOG])
+handler = logging.FileHandler(filename=path_to_logfile, mode='a')
+handler.setFormatter(formatter)
+logger = logging.getLogger()
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
-    # 2. Check Directories if present, if not, create them
-    build_directories()
+# Suspend logging
+lock = True
 
-    # 3. Activate Logger
-    path_to_logfile = PathOperations().create_path_string(FullPathElements.F1_LOGS + [FileNames().FN_LOG])
-    
-    # Set up logging to a file using the custom Formatter to later store created log message to variable 
-    formatter = MyFormatter(fmt='%(asctime)s: %(message)s')
-    handler = logging.FileHandler(filename=path_to_logfile, mode='a')  # mode 'a' means append new log messages; mode 'w' means 'write' rather rewrite new log messages (previous messages are overwritten)
-    handler.setFormatter(formatter)
-    logger = logging.getLogger()
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+# Activate Listener
+with keyboard.Listener(on_press=on_press, on_release=on_release) as k_listener, \
+    mouse.Listener(on_move=on_move, on_click=on_click, on_scroll=on_scroll) as m_listener:
 
-    # Log start of session
-    logging.info(f"SEM Apprentice activated!")
+    # Get User Confirmation to Begin Recording
+    start_record = UIOperations().yesno('START RECORDING?', 'Hello!  Should I start recording?')
 
-    # 4. Activate Listener
-    with keyboard.Listener(on_press=on_press, on_release=on_release) as k_listener, \
-        mouse.Listener(on_move=on_move, on_click=on_click, on_scroll=on_scroll) as m_listener:
+    # If user confirms to begin recording...
+    if start_record:
+
+        # Resume logging
+        lock = False
+
+        # Log start of session
+        logging.info(start_message)
+        print(start_message)
+
+        # Quit SEM Apprentice
         m_listener.join()
-        if lock is True:
-            logging.info(f"SEM Apprentice terminated.")
-            exit()
-else:
-    exit()
+        logging.info(end_message)
+        print(end_message)
+        exit()  # must exit because keyboard listener is still active
+    else:
+        exit()

@@ -1,0 +1,8 @@
+numpy
+wheel
+pillow
+pynput
+opencv-python
+pyautogui
+
+
