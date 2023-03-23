@@ -27,7 +27,7 @@ from pynput import keyboard
 # b = r'Documents'
 # __file__= a + '\\'+ username +'\\' +b
 
-
+# Get path to directory enclosing this script
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 class DirNames:
@@ -44,17 +44,12 @@ class FullPathElements:
     F1_SCREENSHOTS = F0_DATA_PARENT + [DirNames.DN_SCREENSHOTS]
 
 class PathOperations:
-    
-    # create one pathstring from list of path elements with '/' or '\' as separator
-    def create_path_string_custom(self, list_of_path_elements, separator_type):
+    # create pathstring from list of path elements
+    def create_path_string(self, list_of_path_elements):
         if all(map(lambda x: isinstance(x, str), list_of_path_elements)):
-            return separator_type.join(list_of_path_elements)
+            return '/'.join(list_of_path_elements)
         else:
             raise ValueError("All pathnames must be strings.")
-    
-    # create pathstring from list of path elements but gets separator_type from machine_settings
-    def create_path_string(self, list_of_path_elements):
-        return self.create_path_string_custom(list_of_path_elements, '/')
     
 class MachineOperations:
 
@@ -90,11 +85,9 @@ class UIOperations:
 class MyFormatter(logging.Formatter):
     def __init__(self, fmt=None, datefmt=None, style='%'):
         super().__init__(fmt=fmt, datefmt=datefmt, style=style)
-        # self.log_message = None
         self.timestamp = None
 
     def format(self, record):
-        # self.log_message = super().format(record)
         self.timestamp = self.formatTime(record, self.datefmt)
         return super().format(record)
     
@@ -134,8 +127,6 @@ def snap_and_save(signal, detail, mode):
 
     # log message
     logging.info(message)
-
-    # log_message = formatter.log_message
 
     # format filename
     raw_timestamp = formatter.timestamp
@@ -190,6 +181,7 @@ def on_scroll(x, y, dx, dy):
 
 
 # Set constants
+
 start_message = "SEM Apprentice activated!"
 end_message = "SEM Apprentice terminated."
 
