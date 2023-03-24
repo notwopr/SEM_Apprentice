@@ -7,7 +7,6 @@ WELCOME TO SEM_APPRENTICE!
 """
 # SYSTEM IMPORTS
 import os
-import pickle as pkl
 import re
 from pathlib import Path
 import logging
@@ -16,19 +15,14 @@ import tkinter as tk
 import pyautogui
 from pynput import mouse
 from pynput import keyboard
-import win32gui, win32ui, win32con
+from win32gui import GetWindowDC, ReleaseDC, DeleteObject
+from win32ui import CreateDCFromHandle, CreateBitmap
+from win32con import SRCCOPY
 from PIL import Image
-# get the current directory path
-#__file__= r'C:\Users\...'
-# username = os.getlogin()
 
-# a = r'C:\Users'
-# b = r'Documents'
-# __file__= a + '\\'+ username +'\\' +b
 
 # Get path to directory enclosing this script
 current_dir = os.path.dirname(os.path.abspath(__file__))
-# sct = mss()
 resolution = pyautogui.size()
 
 class DirNames:
@@ -69,10 +63,6 @@ class MachineOperations:
             print("Directory created.")
         else:
             print(f"Directory {path_to_dir} already exists.")
-    
-    def savetopkl(self, path: str, filedata):
-        with open(Path(path), "wb") as targetfile:
-            pkl.dump(filedata, targetfile, protocol=4)
 
 
 class UIOperations:
@@ -123,33 +113,37 @@ def get_key_symbol(key):
         return key
 
 def win32_snap_save(path_to_img):
-    w = resolution[0] # set this
-    h = resolution[1] # set this
+    w = 1920 #resolution[0] # set this
+    h = 1080 #resolution[1] # set this
 
     hwnd = None #win32gui.FindWindow(None, windowname)
 
     # get image data and save to bmp
-    wDC = win32gui.GetWindowDC(hwnd)
-    dcObj=win32ui.CreateDCFromHandle(wDC)
+    wDC = GetWindowDC(hwnd)
+    dcObj=CreateDCFromHandle(wDC)
     cDC=dcObj.CreateCompatibleDC()
-    dataBitMap = win32ui.CreateBitmap()
+    dataBitMap = CreateBitmap()
     dataBitMap.CreateCompatibleBitmap(dcObj, w, h)
     cDC.SelectObject(dataBitMap)
-    cDC.BitBlt((0,0),(w, h) , dcObj, (0,0), win32con.SRCCOPY)
-    # dataBitMap.SaveBitmapFile(cDC, path_to_img)
-    bmpstr = dataBitMap.GetBitmapBits(True)
-    
+    cDC.BitBlt((0,0),(w, h) , dcObj, (0,0), SRCCOPY)
+
+    # save to bitmap
+    dataBitMap.SaveBitmapFile(cDC, path_to_img)
+
+    # save to png
+    # bmpstr = dataBitMap.GetBitmapBits(True)
+    # img = Image.frombuffer(
+    #     'RGB',
+    #     (w,h),
+    #     bmpstr, 'raw', 'BGRX', 0, 1)
+    # img.save(path_to_img)
+  
     # Free Resources
     dcObj.DeleteDC()
     cDC.DeleteDC()
-    win32gui.ReleaseDC(hwnd, wDC)
-    win32gui.DeleteObject(dataBitMap.GetHandle())
+    ReleaseDC(hwnd, wDC)
+    DeleteObject(dataBitMap.GetHandle())
 
-    img = Image.frombuffer(
-        'RGB',
-        (w,h),
-        bmpstr, 'raw', 'BGRX', 0, 1)
-    img.save(path_to_img)
 
 def snap_and_save(signal, detail, mode):
     # compose log message
@@ -167,52 +161,62 @@ def snap_and_save(signal, detail, mode):
     timestamp_formatted = re.sub(r'\,|\:|\-|\s', '', raw_timestamp)
     filename = f"{timestamp_formatted} {message}.png"
     ss_path = PathOperations().create_path_string(FullPathElements.F1_SCREENSHOTS+[filename])
-    win32_snap_save(ss_path)
+    # win32_snap_save(ss_path)
 
 def on_press(key):
     global lock
+    # if listener not suspended...
     if not lock: 
-        # if lock is True, that means Stop Recording? prompt is open, so do not log until prompt closes
+        print('press') 
         snap_and_save('pressed', key, 'keyboard')
 
 def on_release(key):
     global lock
+    # if listener not suspended...
     if not lock: 
-        # if lock is True, that means Stop Recording? prompt is open, so do not log until prompt closes
+        print('release') 
         snap_and_save('released', key, 'keyboard')
 
 def on_move(x, y):
-    global lock   
-    if not lock:  
-        # if lock is True, that means Stop Recording? prompt is open, so do not log until prompt closes
+    global lock
+    # if listener not suspended...
+    if not lock:
+        print('moved')   
         logging.info(f"moved ({x}, {y})")  # coordinates are what mouse moved TO (according to pynput docs)
 
 def on_click(x, y, button, pressed):
-    global lock   
-    if not lock and pressed:  
-        # if lock is True, that means Stop Recording? prompt is open, so do not log until prompt closes
-        snap_and_save('clicked', f'({x}, {y}) {button}', 'mouse')
+    global lock
+    # if listener not suspended...
+    if not lock:
+        if pressed:
+            print(f'clicked')  
+            snap_and_save('clicked', f'({x}, {y}) {button}', 'mouse')
+        else:
+            print(f'unclicked') 
+            snap_and_save('unclicked', f'({x}, {y}) {button}', 'mouse')
 
 def on_scroll(x, y, dx, dy):
     global lock
-    if not lock: 
-        # if lock is True, that means Stop Recording? prompt is open, so do not log until prompt closes
+    # if listener not suspended...
+    if not lock:
+        print('scroll')
         logging.info(f"scrolled ({x}, {y})({dx}, {dy})")
 
-    # If User is finished recording, user moves mouse to upperleft corner and scrolls
-    if x<2 and y<2 and not lock:
-    # if lock is False, set to True and display message, suspend Listener
-        lock = True
-        # Display confirmation box
-        stop_record = UIOperations().yesno('STOP RECORDING?', 'Hi! Do you want to stop recording?')
-        if stop_record:
-            return False
-        lock = False  # if chose 'No', then change lock to False and continue logging
+        # If user moves mouse to upperleft corner and scrolls
+        if x<2 and y<2:
+            # suspend all listener activity
+            lock = True 
+            # Display confirmation box
+            stop_record = UIOperations().yesno('STOP RECORDING?', 'Hi! Would you like to stop recording?')
+            if stop_record:
+                return False
+            # if chose 'No', then resume listening
+            lock = False  
 
 
 # Set constants
-start_message = "Hi! I am learning."
-end_message = "Hello! I have stopped."
+start_message = "I am learning :D"
+end_message = "I stopped learning. Please come back soon :_)"
 
 """EXECUTABLES BELOW"""
 # Check Directories if present, if not, create them
@@ -227,12 +231,11 @@ logger = logging.getLogger()
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-# Suspend logging
+# Suspend listener
 lock = True
 
 # Activate Listener
-with keyboard.Listener(on_press=on_press, on_release=on_release) as k_listener, \
-    mouse.Listener(on_move=on_move, on_click=on_click, on_scroll=on_scroll) as m_listener:
+with keyboard.Listener(on_press=on_press, on_release=on_release) as k_listener, mouse.Listener(on_move=on_move, on_click=on_click, on_scroll=on_scroll) as m_listener:
 
     # Get User Confirmation to Begin Recording
     start_record = UIOperations().yesno('START RECORDING?', 'Hello!  Should I start recording?')
@@ -240,15 +243,13 @@ with keyboard.Listener(on_press=on_press, on_release=on_release) as k_listener, 
     # If user confirms to begin recording...
     if start_record:
 
-        # Resume logging
+        # Resume listening
         lock = False
-
         # Log start of session
         logging.info(start_message)
         print(start_message)
-
-        # Quit SEM Apprentice
         m_listener.join()
+        # Quit SEM Apprentice
         # notify that you shut off recording
         logging.info(end_message)
         print(end_message)
