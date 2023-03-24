@@ -113,8 +113,8 @@ def get_key_symbol(key):
         return key
 
 def win32_snap_save(path_to_img):
-    w = 1920 #resolution[0] # set this
-    h = 1080 #resolution[1] # set this
+    w = resolution[0] # set this
+    h = resolution[1] # set this
 
     hwnd = None #win32gui.FindWindow(None, windowname)
 
@@ -161,7 +161,7 @@ def snap_and_save(signal, detail, mode):
     timestamp_formatted = re.sub(r'\,|\:|\-|\s', '', raw_timestamp)
     filename = f"{timestamp_formatted} {message}.png"
     ss_path = PathOperations().create_path_string(FullPathElements.F1_SCREENSHOTS+[filename])
-    # win32_snap_save(ss_path)
+    win32_snap_save(ss_path)
 
 def on_press(key):
     global lock
