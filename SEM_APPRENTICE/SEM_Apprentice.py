@@ -7,20 +7,17 @@ WELCOME TO SEM_APPRENTICE!
 """
 # SYSTEM IMPORTS
 import os
+import pickle as pkl
 import re
 from pathlib import Path
 import logging
 from tkinter import messagebox
 import tkinter as tk
 import pyautogui
-import d3dshot
-import dxcam
-import cv2
-import numpy as np
 from pynput import mouse
 from pynput import keyboard
-
-
+import win32gui, win32ui, win32con
+from PIL import Image
 # get the current directory path
 #__file__= r'C:\Users\...'
 # username = os.getlogin()
@@ -31,6 +28,8 @@ from pynput import keyboard
 
 # Get path to directory enclosing this script
 current_dir = os.path.dirname(os.path.abspath(__file__))
+# sct = mss()
+resolution = pyautogui.size()
 
 class DirNames:
     DN_DATA_PARENT = 'SEMBOT_DATA'
@@ -70,6 +69,10 @@ class MachineOperations:
             print("Directory created.")
         else:
             print(f"Directory {path_to_dir} already exists.")
+    
+    def savetopkl(self, path: str, filedata):
+        with open(Path(path), "wb") as targetfile:
+            pkl.dump(filedata, targetfile, protocol=4)
 
 
 class UIOperations:
@@ -119,6 +122,35 @@ def get_key_symbol(key):
     else:
         return key
 
+def win32_snap_save(path_to_img):
+    w = resolution[0] # set this
+    h = resolution[1] # set this
+
+    hwnd = None #win32gui.FindWindow(None, windowname)
+
+    # get image data and save to bmp
+    wDC = win32gui.GetWindowDC(hwnd)
+    dcObj=win32ui.CreateDCFromHandle(wDC)
+    cDC=dcObj.CreateCompatibleDC()
+    dataBitMap = win32ui.CreateBitmap()
+    dataBitMap.CreateCompatibleBitmap(dcObj, w, h)
+    cDC.SelectObject(dataBitMap)
+    cDC.BitBlt((0,0),(w, h) , dcObj, (0,0), win32con.SRCCOPY)
+    # dataBitMap.SaveBitmapFile(cDC, path_to_img)
+    bmpstr = dataBitMap.GetBitmapBits(True)
+    
+    # Free Resources
+    dcObj.DeleteDC()
+    cDC.DeleteDC()
+    win32gui.ReleaseDC(hwnd, wDC)
+    win32gui.DeleteObject(dataBitMap.GetHandle())
+
+    img = Image.frombuffer(
+        'RGB',
+        (w,h),
+        bmpstr, 'raw', 'BGRX', 0, 1)
+    img.save(path_to_img)
+
 def snap_and_save(signal, detail, mode):
     # compose log message
     match mode:
@@ -134,12 +166,8 @@ def snap_and_save(signal, detail, mode):
     raw_timestamp = formatter.timestamp
     timestamp_formatted = re.sub(r'\,|\:|\-|\s', '', raw_timestamp)
     filename = f"{timestamp_formatted} {message}.png"
-
-    # takes snapshot and save image to disk with that filename
-    image = pyautogui.screenshot()
-    image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)  #why do I need this step # also can I save just the template # can I save only the program window, not the entire screenshot
     ss_path = PathOperations().create_path_string(FullPathElements.F1_SCREENSHOTS+[filename])
-    cv2.imwrite(ss_path, image)
+    win32_snap_save(ss_path)
 
 def on_press(key):
     global lock
@@ -176,16 +204,15 @@ def on_scroll(x, y, dx, dy):
     # if lock is False, set to True and display message, suspend Listener
         lock = True
         # Display confirmation box
-        stop_record = UIOperations().yesno('STOP RECORDING?', 'Are you sure you want to stop recording?')
+        stop_record = UIOperations().yesno('STOP RECORDING?', 'Hi! Do you want to stop recording?')
         if stop_record:
             return False
         lock = False  # if chose 'No', then change lock to False and continue logging
 
 
 # Set constants
-
-start_message = "SEM Apprentice activated!"
-end_message = "SEM Apprentice terminated."
+start_message = "Hi! I am learning."
+end_message = "Hello! I have stopped."
 
 """EXECUTABLES BELOW"""
 # Check Directories if present, if not, create them
@@ -194,8 +221,7 @@ build_directories()
 # Activate Logger (using the custom Formatter to later store created log message to variable)
 # mode 'a' means append new log messages; mode 'w' means 'write' rather rewrite new log messages (previous messages are overwritten)
 formatter = MyFormatter(fmt='%(asctime)s: %(message)s')
-path_to_logfile = PathOperations().create_path_string(FullPathElements.F1_LOGS + [FileNames().FN_LOG])
-handler = logging.FileHandler(filename=path_to_logfile, mode='a')
+handler = logging.FileHandler(filename=PathOperations().create_path_string(FullPathElements.F1_LOGS + [FileNames().FN_LOG]), mode='a')
 handler.setFormatter(formatter)
 logger = logging.getLogger()
 logger.addHandler(handler)
@@ -223,6 +249,7 @@ with keyboard.Listener(on_press=on_press, on_release=on_release) as k_listener, 
 
         # Quit SEM Apprentice
         m_listener.join()
+        # notify that you shut off recording
         logging.info(end_message)
         print(end_message)
         exit()  # must exit because keyboard listener is still active
