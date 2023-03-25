@@ -8,6 +8,7 @@ WELCOME TO SEM_APPRENTICE!
 # SYSTEM IMPORTS
 import os
 import re
+import datetime as dt
 from pathlib import Path
 import logging
 from tkinter import messagebox
@@ -20,10 +21,110 @@ from win32ui import CreateDCFromHandle, CreateBitmap
 from win32con import SRCCOPY
 from PIL import Image
 
-
 # Get path to directory enclosing this script
 current_dir = os.path.dirname(os.path.abspath(__file__))
 resolution = pyautogui.size()
+
+symbol_legend = {
+    "Button.left": "leftbutton",
+    "Button.right": "rightbutton",
+    ".": "period",
+    ",": "comma",
+    ";": "semicolon",
+    "#": "pound",
+    "%": "percent",
+    "&": "ampersand",
+    "(": "leftparenthesis",
+    ")": "rightparenthesis",
+    "[": "leftbracket",
+    "]": "rightbracket",
+    "{": "leftbrace",
+    "}": "rightbrace",
+    "<": "leftchevron",
+    ">": "rightchevron",
+    "\\": "backslash",
+    "*": "asterisk",
+    "?": "question",
+    "/": "forwardslash",
+    " ": "space",
+    "$": "dollar",
+    "!": "exclamation",
+    "'": "singlequote",
+    "\"": "doublequote",
+    ":": "colon",
+    "@": "atsign",
+    "+": "plus",
+    "`": "backtick",
+    "|": "pipe",
+    "=": "equal",
+    "~": "tilde",
+    "^": "caret",
+    "_": "underscore",
+    "-": "minus",
+    "<12>": "numpad_numlockoff_5",
+    "<48>": "ctrl_0",
+    "<49>": "ctrl_1",
+    "<50>": "ctrl_2",
+    "<51>": "ctrl_3",
+    "<52>": "ctrl_4",
+    "<53>": "ctrl_5",
+    "<54>": "ctrl_6",
+    "<55>": "ctrl_7",
+    "<56>": "ctrl_8",
+    "<57>": "ctrl_9",
+    "\\x11": "ctrl_q",
+    "\\x17": "ctrl_w",
+    "\\x05": "ctrl_e",
+    "\\x12": "ctrl_r",
+    "\\x14": "ctrl_t",
+    "\\x19": "ctrl_y",
+    "\\x15": "ctrl_u",
+    "\\t": "ctrl_i",
+    "\\x0f": "ctrl_o",
+    "\\x10": "ctrl_p",
+    "\\x1b": "ctrl_leftbracket",
+    "\\x1d": "ctrl_rightbracket",
+    "\\x1c": "ctrl_backslash",
+    "\\x01": "ctrl_a",
+    "\\x13": "ctrl_s",
+    "\\x04": "ctrl_d",
+    "\\x06": "ctrl_f",
+    "\\x07": "ctrl_g",
+    "\\x08": "ctrl_h",
+    "\\n": "ctrl_j",
+    "\\x0b": "ctrl_k",
+    "\\x0c": "ctrl_l",
+    "<186>": "ctrl_;",
+    "<222>": "ctrl_'",
+    "\\x1a": "ctrl_z",
+    "\\x18": "ctrl_x",
+    "\\x03": "ctrl_c",
+    "\\x16": "ctrl_v",
+    "\\x02": "ctrl_b",
+    "\\x0e": "ctrl_n",
+    "\\r": "ctrl_m",
+    "<188>": "ctrl_comma",
+    "<190>": "ctrl_period",
+    "<191>": "ctrl_forwardslash",
+    "<96>": "numpad_numlockon_0",
+    "<97>": "numpad_numlockon_1",
+    "<98>": "numpad_numlockon_2",
+    "<99>": "numpad_numlockon_3",
+    "<100>": "numpad_numlockon_4",
+    "<101>": "numpad_numlockon_5",
+    "<102>": "numpad_numlockon_6",
+    "<103>": "numpad_numlockon_7",
+    "<104>": "numpad_numlockon_8",
+    "<105>": "numpad_numlockon_9",
+    "<106>": "numpad_ctrl_asterisk",
+    "<107>": "numpad_ctrl_plus",
+    "<109>": "numpad_ctrl_minus",
+    "<110>": "numpad_numlockon_period",
+    "<111>": "numpad_ctrl_forwardslash",
+    "<187>": "ctrl_equal",
+    "<189>": "ctrl_minus",
+    "<192>": "ctrl_backtick",
+}
 
 class DirNames:
     DN_DATA_PARENT = 'SEMBOT_DATA'
@@ -64,7 +165,6 @@ class MachineOperations:
         else:
             print(f"Directory {path_to_dir} already exists.")
 
-
 class UIOperations:
     def yesno(self, title, question):
         """Gives a Yes/No popup dialog box that stays on top of everything else on the screen always and doesn't close until you click yes or no"""
@@ -76,16 +176,18 @@ class UIOperations:
         root.destroy()  # destroy the root window
         return response
 
-# Create a custom Formatter that captures the entire log message in a variable
-class MyFormatter(logging.Formatter):
-    def __init__(self, fmt=None, datefmt=None, style='%'):
-        super().__init__(fmt=fmt, datefmt=datefmt, style=style)
-        self.timestamp = None
+class TimeStamp:
 
-    def format(self, record):
-        self.timestamp = self.formatTime(record, self.datefmt)
-        return super().format(record)
+    def __init__(self):
+        self.__dtobj = dt.datetime.now()
     
+    @property
+    def dtobject(self):
+        return self.__dtobj
+
+    @property
+    def string_justnums(self):
+        return re.sub(r'\.|\:|\-|\s', '', str(self.__dtobj))
 
 def build_directories():
     
@@ -104,13 +206,45 @@ def build_directories():
         MachineOperations().create_nonexistent_directory(pathstring)
 
 def get_key_symbol(key):
-    """given key, determines the name of that key, regardless whether it has .char, .vk or neither attribute"""
-    if hasattr(key, 'vk') and 96 <= key.vk <= 105:
-        return key.vk - 96
+    """given keystroke return its name"""
+    char = None
+    vk = None
+    neither = key
+    symbol = None
     if hasattr(key, 'char'):
-        return key.char
-    else:
-        return key
+        # print('char found')
+        char = key.char
+    if hasattr(key, 'vk'):
+        # print('vk found')
+        vk = key.vk
+
+    if char is None and vk is None:
+        symbol = str(key)[4:]
+        if symbol.endswith('_r'):
+            symbol = f"right{symbol[:-2]}"
+        elif symbol.endswith('_l'):
+            symbol = f"left{symbol[:-2]}"
+        elif symbol == 'shift':
+            symbol = f"left{symbol}"
+    elif char is None and vk is not None:
+        # some keys in numpad satisfy this condition
+        symbol = str(neither)
+    elif char:
+        symbol = char
+    
+    # pressing ctrl plus any of keys in the alphabet rows except the functional keys (enter, shift tab, etc.) 
+    if str(neither).startswith("'\\"):
+        symbol = str(neither)[1:-1]
+
+    # print(f"vk: {vk} char: {char} neither: {neither}")
+
+    final_symbol = symbol_legend.get(symbol, symbol)
+    # print(f"final symbol: {final_symbol}")
+    return final_symbol
+
+def gen_log_msg(message):
+    t = TimeStamp()
+    logging.info(f"{t.dtobject}: {message}")
 
 def win32_snap_save(path_to_img):
     w = resolution[0] # set this
@@ -144,63 +278,63 @@ def win32_snap_save(path_to_img):
     ReleaseDC(hwnd, wDC)
     DeleteObject(dataBitMap.GetHandle())
 
-
 def snap_and_save(signal, detail, mode):
     # compose log message
     match mode:
         case 'keyboard':
-            message = f'{signal} {get_key_symbol(detail)}'
+            message = f'{signal.upper()} {get_key_symbol(detail)}'
+            message_fileversion = f'{signal.upper()}_{get_key_symbol(detail)}'
         case 'mouse':
-            message = f"{signal} {detail}"
+            message = f"{signal.upper()} ({detail[0]}, {detail[1]}) with {detail[2]}"
+            message_fileversion = f"{signal.upper()}_x{detail[0]}_y{detail[1]}_{detail[2]}"
 
     # log message
-    logging.info(message)
+    t = TimeStamp()
+    logging.info(f"{t.dtobject}: {message}")
 
     # format filename
-    raw_timestamp = formatter.timestamp
-    timestamp_formatted = re.sub(r'\,|\:|\-|\s', '', raw_timestamp)
-    filename = f"{timestamp_formatted} {message}.png"
+    filename = f"{t.string_justnums}__{message_fileversion}.png"
     ss_path = PathOperations().create_path_string(FullPathElements.F1_SCREENSHOTS+[filename])
     win32_snap_save(ss_path)
 
 def on_press(key):
     global lock
     # if listener not suspended...
-    if not lock: 
-        print('press') 
+    if not lock:
+        # print('press') 
         snap_and_save('pressed', key, 'keyboard')
 
 def on_release(key):
     global lock
     # if listener not suspended...
     if not lock: 
-        print('release') 
+        # print('release') 
         snap_and_save('released', key, 'keyboard')
 
 def on_move(x, y):
     global lock
     # if listener not suspended...
     if not lock:
-        print('moved')   
-        logging.info(f"moved ({x}, {y})")  # coordinates are what mouse moved TO (according to pynput docs)
+        # print('moved')
+        gen_log_msg(f"moved ({x}, {y})")  # coordinates are what mouse moved TO (according to pynput docs)
 
 def on_click(x, y, button, pressed):
     global lock
     # if listener not suspended...
     if not lock:
         if pressed:
-            print(f'clicked')  
-            snap_and_save('clicked', f'({x}, {y}) {button}', 'mouse')
+            # print(f'clicked')  
+            snap_and_save('clicked', [x, y, symbol_legend.get(str(button), button)], 'mouse')
         else:
-            print(f'unclicked') 
-            snap_and_save('unclicked', f'({x}, {y}) {button}', 'mouse')
+            # print(f'unclicked') 
+            snap_and_save('unclicked', [x, y, symbol_legend.get(str(button), button)], 'mouse')
 
 def on_scroll(x, y, dx, dy):
     global lock
     # if listener not suspended...
     if not lock:
-        print('scroll')
-        logging.info(f"scrolled ({x}, {y})({dx}, {dy})")
+        # print('scroll')
+        gen_log_msg(f"scrolled ({x}, {y}) ({dx}, {dy})")
 
         # If user moves mouse to upperleft corner and scrolls
         if x<2 and y<2:
@@ -223,13 +357,7 @@ end_message = "I stopped learning. Please come back soon :_)"
 build_directories()
 
 # Activate Logger (using the custom Formatter to later store created log message to variable)
-# mode 'a' means append new log messages; mode 'w' means 'write' rather rewrite new log messages (previous messages are overwritten)
-formatter = MyFormatter(fmt='%(asctime)s: %(message)s')
-handler = logging.FileHandler(filename=PathOperations().create_path_string(FullPathElements.F1_LOGS + [FileNames().FN_LOG]), mode='a')
-handler.setFormatter(formatter)
-logger = logging.getLogger()
-logger.addHandler(handler)
-logger.setLevel(logging.INFO)
+logging.basicConfig(filename=PathOperations().create_path_string(FullPathElements.F1_LOGS + [FileNames().FN_LOG]), level=logging.INFO, format='%(message)s', force =True)
 
 # Suspend listener
 lock = True
@@ -246,12 +374,11 @@ with keyboard.Listener(on_press=on_press, on_release=on_release) as k_listener, 
         # Resume listening
         lock = False
         # Log start of session
-        logging.info(start_message)
+        gen_log_msg(start_message)
         print(start_message)
         m_listener.join()
-        # Quit SEM Apprentice
-        # notify that you shut off recording
-        logging.info(end_message)
+        # Log end of session
+        gen_log_msg(end_message)
         print(end_message)
         exit()  # must exit because keyboard listener is still active
     else:
