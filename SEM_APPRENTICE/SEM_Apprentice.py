@@ -20,6 +20,7 @@ from win32gui import GetWindowDC, ReleaseDC, DeleteObject
 from win32ui import CreateDCFromHandle, CreateBitmap
 from win32con import SRCCOPY
 from PIL import Image
+import dxcam
 
 # Get path to directory enclosing this script
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -278,6 +279,14 @@ def win32_snap_save(path_to_img):
     ReleaseDC(hwnd, wDC)
     DeleteObject(dataBitMap.GetHandle())
 
+def dxcam_snap_save(path_to_img):
+    screenshot = camera.grab()
+    if screenshot is not None:
+        # Convert the numpy array to a Pillow image object
+        image = Image.fromarray(screenshot)
+        # Save the image as a PNG file to disk
+        image.save(path_to_img)
+
 def snap_and_save(signal, detail, mode):
     # compose log message
     match mode:
@@ -295,7 +304,8 @@ def snap_and_save(signal, detail, mode):
     # format filename
     filename = f"{t.string_justnums}__{message_fileversion}.png"
     ss_path = PathOperations().create_path_string(FullPathElements.F1_SCREENSHOTS+[filename])
-    win32_snap_save(ss_path)
+    dxcam_snap_save(ss_path)
+    # win32_snap_save(ss_path)
 
 def on_press(key):
     global lock
@@ -361,6 +371,9 @@ logging.basicConfig(filename=PathOperations().create_path_string(FullPathElement
 
 # Suspend listener
 lock = True
+
+# turn on dxcam 
+camera = dxcam.create()
 
 # Activate Listener
 with keyboard.Listener(on_press=on_press, on_release=on_release) as k_listener, mouse.Listener(on_move=on_move, on_click=on_click, on_scroll=on_scroll) as m_listener:
