@@ -2,7 +2,7 @@
 WELCOME TO SEM_APPRENTICE!
 
 **SEM_APPRENTICE IS THE PROPERTY OF THE AUTHORS AND OWNERS OF SEM_APPRENTICE (ANUDHA MITTAL and DAVID CHOI) AND MAY NOT BE DISTRIBUTED, COPIED, SOLD, OR USED WITHOUT THE EXPRESS CONSENT FROM THEM.**
-**BY USING AND/OR POSSESSING SEM_APPRENTICE CODE, YOU ACKNOWLEDGE AND AGREE TO THESE TERMS.  COPYRIGHT MARCH 15, 2023**
+**BY USING AND/OR POSSESSING SEM_APPRENTICE CODE, YOU ACKNOWLEDGE AND AGREE TO THESE TERMS.  © 2023 ANUDHA MITTAL and DAVID CHOI**
 
 """
 # SYSTEM IMPORTS
@@ -23,8 +23,13 @@ from win32con import SRCCOPY
 from PIL import Image
 import dxcam
 
+
+# Get the path to the directory where the executable is located
+current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+
 # Get path to directory enclosing this script
-current_dir = os.path.dirname(os.path.abspath(__file__))
+# current_dir = os.path.dirname(os.path.abspath(__file__))
+
 resolution = pyautogui.size()
 
 symbol_legend = {
@@ -438,10 +443,14 @@ def on_scroll(x, y, dx, dy):
 # Set constants
 start_message = "I am learning :D"
 end_message = "I stopped learning. Please come back soon :_)"
-
+copyright_block = "SEM_APPRENTICE\nVERSION: 2.1\n\nWELCOME TO SEM_APPRENTICE!\n\n** SEM_APPRENTICE IS THE PROPERTY OF THE AUTHORS AND OWNERS OF SEM_APPRENTICE (ANUDHA MITTAL and DAVID CHOI) AND MAY NOT BE DISTRIBUTED, COPIED, SOLD, OR USED WITHOUT THE EXPRESS CONSENT FROM THEM.\n**BY USING AND/OR POSSESSING SEM_APPRENTICE CODE, YOU ACKNOWLEDGE AND AGREE TO THESE TERMS.\n© 2023 ANUDHA MITTAL and DAVID CHOI.  ALL RIGHTS RESERVED."
 
 """EXECUTABLES BELOW"""
 # Check Directories if present, if not, create them
+print("\n")
+print("\n")
+print(copyright_block)
+
 build_directories()
 
 # Activate Logger (using the custom Formatter to later store created log message to variable)

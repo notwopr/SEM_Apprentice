@@ -1,46 +1,43 @@
 
-_SEM_Apprentice is the property of the authors and owners of SEM_Apprentice (Anudha Mittal and David Choi) and may not be distributed, copied, sold, or used without the express consent from them.  By using and/or possessing SEM_Apprentice code, you acknowledge and agree to these terms.  Copyright March 15, 2023_
+_SEM_Apprentice is the property of the authors and owners of SEM_Apprentice (Anudha Mittal and David Choi) and may not be distributed, copied, sold, or used without the express consent from them.  By using and/or possessing SEM_Apprentice code, you acknowledge and agree to these terms.  © 2023 Anudha Mittal and David Choi. All Rights Reserved._
 
 __WELCOME TO SEM_APPRENTICE!__
 
-**OVERVIEW**
-Thank you for participating in this project to collect data that will be used to train an AI model which we hope will improve the experience of operating SEMs in the future.  As such, the program is designed to capture certain data as you operate your microscope software.  
+**WHAT DOES SEM APPRENTICE DO?**
+Thank you for participating with us on our mission to improve the SEM experience.  SEM Apprentice is a program you run in the background while you use your microscope software.  While SEM Apprentice is running, it records your mouse and keyboard actions and also takes screenshots of your activity.  This data is stored in a folder locally on your machine.  Our hope is to gather the data you've generated to help us train our AI models.  Our AI models will be designed to operate an SEM automatically.  The more data we have to train with, the better the AI will be.  
 
-The following data will be captured while running this program:
-    --mouse actions
-    --keyboard actions
-    --screenshots of your screen when you click your mouse or possibly make certain keystrokes.
-
-You may terminate this program at any point in time by simply moving your mouse cursor to the upper-left-hand corner of your screen and scrolling down.  You will then get a prompt to confirm you would like to terminate the program.
-
-When you have finished using the program and have collected the data your SEM_Apprentice representative requested you collect, please contact them when you are ready to have them retrieve your data.
+**DATA PRIVACY**
+We understand that you may be concerned about released your data to us.  Your participation in this mission is completely voluntary.  
 
 If you are at all concerned about the data being recorded, you may review the data yourself and decide whether to withhold or release any or all of the data to us.  You can find any recorded data in the SEMBOT_DATA folder which will be found in the same folder as this README file.  If there is no folder, that means no data has been collected.    
 
 You have the right to not release to us any or all data recorded.
 
+The following data will be captured while running this program:
+    --mouse actions (coordinates of the cursor, clicking, scrolling, moving events)
+    --keyboard actions (keys pressed and released)
+    --screenshots of your screen when you click your mouse or type.
 
-**FOLLOW THESE INSTRUCTIONS BEFORE RUNNING SEM_APPRENTICE:**
+**INSTALLATION**
+No installation is required.  SEM Apprentice exists on a single EXE file.  
 
-1. INSTALL PYTHON IF NOT ALREADY INSTALLED.
-2. INSTALL THE FOLLOWING DEPENDENCIES IF NOT ALREADY INSTALLED:
-    pyautogui
-    opencv-python
-    numpy
-    pynput
+**HOW TO USE**
+To run, simply double-click the EXE file.  It is recommended you have your microscope software up and running and ready to use prior to running SEM Apprentice.
 
+You may stop SEM Apprentice at any point in time by simply moving your mouse cursor to the upper-left-hand corner of your screen and scrolling either up or down.  You will then get a prompt to confirm that you would like to stop SEM Apprentice.
 
-**HOW TO USE SEM_APPRENTICE**
+You may start and stop the program as many times as you like.  SEM Apprentice will keep a record of all recording sessions and will store all data generated in the SEMBOT_DATA folder located in the same directory as this README and EXE files.  If there is no folder, that means no data has been recorded.
 
-1. Run the file sem_apprentice.py using your python interpreter.
-2. A dialog box will pop up asking you to confirm whether you would like to begin recording.  
-3. Do not confirm yet.  First, open up your microscope software that you will be using. The dialog box will remain on top while you ready your microscope software.  
-4. When you have your microscope software open, you may click "YES" on the dialog box. 
-3. SEM_Apprentice will begin recording your actions.
-4. Begin using your microscope software as you normally would.
-5. When finished using your microscope software, do not quit your microscope software.
-6. Terminate SEM_Apprentice before exiting your microscope software.
-7. To terminate SEM_Apprentice, move your mouse to the TOP LEFT corner of the screen and scroll.  A dialog box will appear asking you to confirm that you want to stop.
-8. Click "Yes."  SEM_Apprentice will have terminated.
+When you have finished participating in generating training data, you may want to review the data generated in the SEMBOT_DATA folder to resolve any data privacy concerns you may have before releasing the folder to us.  When you are ready to release your data to us, let us know!
 
-_SEM_Apprentice is the property of the authors and owners of SEM_Apprentice (Anudha Mittal and David Choi) and may not be distributed, copied, sold, or used without the express consent from them.  By using and/or possessing SEM_Apprentice code, you acknowledge and agree to these terms.  Copyright March 15, 2023_
+You have the right to not release to us any or all data recorded.
+
+Thank you again for choosing to participate with us and helping us make SEM life easier!
+
+-The SEM Apprentice Team
+
+**VERSION INFO**
+Application: SEM Apprentice 
+Version: 2.1
+
+_SEM_Apprentice is the property of the authors and owners of SEM_Apprentice (Anudha Mittal and David Choi) and may not be distributed, copied, sold, or used without the express consent from them.  By using and/or possessing SEM_Apprentice code, you acknowledge and agree to these terms.  © 2023 Anudha Mittal and David Choi.  All Rights Reserved._
