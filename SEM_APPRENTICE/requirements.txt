@@ -5,4 +5,5 @@ pynput
 pyautogui
 pywin32
 dxcam
+pysimplegui
 
