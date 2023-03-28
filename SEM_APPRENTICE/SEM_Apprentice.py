@@ -11,7 +11,7 @@ import re
 import datetime as dt
 from pathlib import Path
 import logging
-from tkinter import messagebox
+import PySimpleGUI as psg
 import tkinter as tk
 import pyautogui
 from pynput import mouse
@@ -167,15 +167,91 @@ class MachineOperations:
             print(f"Directory {path_to_dir} already exists.")
 
 class UIOperations:
+    # OLD TKINTER MESSAGEBOX METHOD
+    # def yesno(self, title, question):
+    #     """Gives a Yes/No popup dialog box that stays on top of everything else on the screen always and doesn't close until you click yes or no"""
+        # root = tk.Tk()
+        # root.withdraw()
+        # root.focus_set() # Set the messagebox as the top window
+        # root.attributes('-topmost', True)  # keep window on top of others
+        # response = messagebox.askyesno(title, question)
+        # root.destroy()  # destroy the root window
+        # return response
+
+    # NEW PYSIMPLEGUI METHOD
     def yesno(self, title, question):
         """Gives a Yes/No popup dialog box that stays on top of everything else on the screen always and doesn't close until you click yes or no"""
         root = tk.Tk()
         root.withdraw()
-        root.focus_set() # Set the messagebox as the top window
-        root.attributes('-topmost', True)  # keep window on top of others
-        response = messagebox.askyesno(title, question)
-        root.destroy()  # destroy the root window
-        return response
+
+        background_color_global = "#9F9AA4"
+
+        layout = [
+            [psg.Text(
+                title, 
+                font=('default', 20, "bold"),
+                # text_color='white', 
+                expand_x=True, 
+                pad=5, 
+                justification='center', 
+                background_color="#857e8b", 
+                relief='sunken'  # flat, groove, raised, ridge, solid, or sunken
+                )
+                ],
+            [psg.Text(
+                question, 
+                font=('default', 10, "normal"),
+                # text_color='white',
+                pad=30, 
+                expand_x=True, 
+                justification='center', 
+                background_color=background_color_global
+                )
+                ],
+            [psg.Push(background_color=background_color_global),
+             psg.Yes(
+                # pad=5,
+                # button_color='black',
+                # font=('default', 20, "bold"),
+             ), 
+             psg.No(
+                # pad=5,
+                # button_color='black',
+                # font=('default', 20, "bold"),
+             ), 
+             psg.Push(background_color=background_color_global)
+             ]
+        ]
+        window = psg.Window(
+            title=title, 
+            layout=layout,
+            modal=True,
+            no_titlebar=True,
+            keep_on_top=True,
+            finalize=True,
+            grab_anywhere=False,
+            disable_minimize=True,
+            disable_close=True,
+            size=(715, 300),
+            background_color=background_color_global,
+            element_padding=None,
+            margins=(0, 0, 0, 0),
+            )
+        # root = window.TKroot
+        event, _ = window.read()
+        window.finalize()
+        if event == 'No':
+            window.close()
+            root.destroy()
+            return False
+        elif event == 'Yes':
+            window.close()
+            root.destroy()
+            return True 
+
+    
+
+
 
 class TimeStamp:
 
@@ -291,10 +367,10 @@ def snap_and_save(signal, detail, mode):
     # compose log message
     match mode:
         case 'keyboard':
-            message = f'{signal.upper()} {get_key_symbol(detail)}'
+            message = f'{signal} {get_key_symbol(detail)}'
             message_fileversion = f'{signal.upper()}_{get_key_symbol(detail)}'
         case 'mouse':
-            message = f"{signal.upper()} ({detail[0]}, {detail[1]}) with {detail[2]}"
+            message = f"{signal} ({detail[0]}, {detail[1]}) with {detail[2]}"
             message_fileversion = f"{signal.upper()}_x{detail[0]}_y{detail[1]}_{detail[2]}"
 
     # log message
@@ -304,7 +380,7 @@ def snap_and_save(signal, detail, mode):
     # format filename
     filename = f"{t.string_justnums}__{message_fileversion}.png"
     ss_path = PathOperations().create_path_string(FullPathElements.F1_SCREENSHOTS+[filename])
-    dxcam_snap_save(ss_path)
+    # dxcam_snap_save(ss_path)
     # win32_snap_save(ss_path)
 
 def on_press(key):
@@ -312,21 +388,21 @@ def on_press(key):
     # if listener not suspended...
     if not lock:
         # print('press') 
-        snap_and_save('pressed', key, 'keyboard')
+        snap_and_save('PRESSED', key, 'keyboard')
 
 def on_release(key):
     global lock
     # if listener not suspended...
     if not lock: 
         # print('release') 
-        snap_and_save('released', key, 'keyboard')
+        snap_and_save('RELEASED', key, 'keyboard')
 
 def on_move(x, y):
     global lock
     # if listener not suspended...
     if not lock:
         # print('moved')
-        gen_log_msg(f"moved ({x}, {y})")  # coordinates are what mouse moved TO (according to pynput docs)
+        gen_log_msg(f"MOVED ({x}, {y})")  # coordinates are what mouse moved TO (according to pynput docs)
 
 def on_click(x, y, button, pressed):
     global lock
@@ -334,24 +410,24 @@ def on_click(x, y, button, pressed):
     if not lock:
         if pressed:
             # print(f'clicked')  
-            snap_and_save('clicked', [x, y, symbol_legend.get(str(button), button)], 'mouse')
+            snap_and_save('CLICKED', [x, y, symbol_legend.get(str(button), button)], 'mouse')
         else:
             # print(f'unclicked') 
-            snap_and_save('unclicked', [x, y, symbol_legend.get(str(button), button)], 'mouse')
+            snap_and_save('UNCLICKED', [x, y, symbol_legend.get(str(button), button)], 'mouse')
 
 def on_scroll(x, y, dx, dy):
     global lock
     # if listener not suspended...
     if not lock:
         # print('scroll')
-        gen_log_msg(f"scrolled ({x}, {y}) ({dx}, {dy})")
+        gen_log_msg(f"SCROLLED ({x}, {y}) ({dx}, {dy})")
 
         # If user moves mouse to upperleft corner and scrolls
         if x<2 and y<2:
             # suspend all listener activity
             lock = True 
             # Display confirmation box
-            stop_record = UIOperations().yesno('STOP RECORDING?', 'Hi! Would you like to stop recording?')
+            stop_record = UIOperations().yesno("SEM Apprentice", 'Hi! Would you like to stop recording?')
             if stop_record:
                 return False
             # if chose 'No', then resume listening
@@ -361,6 +437,7 @@ def on_scroll(x, y, dx, dy):
 # Set constants
 start_message = "I am learning :D"
 end_message = "I stopped learning. Please come back soon :_)"
+
 
 """EXECUTABLES BELOW"""
 # Check Directories if present, if not, create them
@@ -379,7 +456,7 @@ camera = dxcam.create()
 with keyboard.Listener(on_press=on_press, on_release=on_release) as k_listener, mouse.Listener(on_move=on_move, on_click=on_click, on_scroll=on_scroll) as m_listener:
 
     # Get User Confirmation to Begin Recording
-    start_record = UIOperations().yesno('START RECORDING?', 'Hello!  Should I start recording?')
+    start_record = UIOperations().yesno("SEM Apprentice", 'Hello!  Should I start recording?')
 
     # If user confirms to begin recording...
     if start_record:
@@ -388,11 +465,19 @@ with keyboard.Listener(on_press=on_press, on_release=on_release) as k_listener, 
         lock = False
         # Log start of session
         gen_log_msg(start_message)
+
+        # Notify User of SEMBot Apprentice beginning recording
+        print('\n')
         print(start_message)
         m_listener.join()
+
         # Log end of session
         gen_log_msg(end_message)
+
+        # Notify User of SEMBot Apprentice Termination
+        print('\n')
         print(end_message)
+        print('\n')
         exit()  # must exit because keyboard listener is still active
     else:
         exit()
