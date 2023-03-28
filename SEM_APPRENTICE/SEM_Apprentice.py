@@ -7,6 +7,7 @@ WELCOME TO SEM_APPRENTICE!
 """
 # SYSTEM IMPORTS
 import os
+import sys
 import re
 import datetime as dt
 from pathlib import Path
@@ -478,6 +479,6 @@ with keyboard.Listener(on_press=on_press, on_release=on_release) as k_listener, 
         print('\n')
         print(end_message)
         print('\n')
-        exit()  # must exit because keyboard listener is still active
+        sys.exit()  # must exit because keyboard listener is still active
     else:
-        exit()
+        sys.exit()
