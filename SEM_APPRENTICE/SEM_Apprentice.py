@@ -14,15 +14,17 @@ from pathlib import Path
 import logging
 import PySimpleGUI as psg
 import tkinter as tk
-import pyautogui
 from pynput import mouse
 from pynput import keyboard
-from win32gui import GetWindowDC, ReleaseDC, DeleteObject
-from win32ui import CreateDCFromHandle, CreateBitmap
-from win32con import SRCCOPY
-from PIL import Image
+import win32gui
+import win32ui
+import win32con
+import win32api
+import pickle as pkl
 import dxcam
-
+from PIL import Image
+import ctypes
+import struct
 
 # Get the path to the directory where the executable is located
 current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -30,7 +32,16 @@ current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 # Get path to directory enclosing this script
 # current_dir = os.path.dirname(os.path.abspath(__file__))
 
-resolution = pyautogui.size()
+# Get Screen Resolution
+user32 = ctypes.windll.user32
+screen_width = user32.GetSystemMetrics(0)
+screen_height = user32.GetSystemMetrics(1)
+
+# Import the necessary Windows API functions and constants
+gdi32 = ctypes.windll.gdi32
+
+
+
 
 symbol_legend = {
     "Button.left": "leftbutton",
@@ -171,6 +182,12 @@ class MachineOperations:
             print("Directory created.")
         else:
             print(f"Directory {path_to_dir} already exists.")
+    
+    def savetopkl(self, filepath: str, filedata):
+        with open(Path(filepath), "wb") as targetfile:
+            pkl.dump(filedata, targetfile, protocol=4)
+
+
 
 class UIOperations:
     # OLD TKINTER MESSAGEBOX METHOD
@@ -329,45 +346,105 @@ def gen_log_msg(message):
     t = TimeStamp()
     logging.info(f"{t.dtobject}: {message}")
 
-def win32_snap_save(path_to_img):
-    w = resolution[0] # set this
-    h = resolution[1] # set this
+# def mss_snap_save(path_to_img):
+#     sct = mss.mss()
 
-    hwnd = None #win32gui.FindWindow(None, windowname)
+#     # Capture the screen
+#     monitor = {"top": 0, "left": 0, "width": screen_width, "height": screen_height}
+#     screenshot = sct.grab(monitor)
+
+#     # Save the screenshot to a file
+#     mss.tools.to_png(screenshot.rgb, screenshot.size, output=path_to_img)
+
+#     # Release the screen capture context
+#     sct.close()
+
+def win32_snap_save(path_to_img):
+    hwnd = None
 
     # get image data and save to bmp
-    wDC = GetWindowDC(hwnd)
-    dcObj=CreateDCFromHandle(wDC)
+    wDC = win32gui.GetWindowDC(hwnd)
+    dcObj = win32ui.CreateDCFromHandle(wDC)
     cDC=dcObj.CreateCompatibleDC()
-    dataBitMap = CreateBitmap()
-    dataBitMap.CreateCompatibleBitmap(dcObj, w, h)
+    dataBitMap = win32ui.CreateBitmap()
+    dataBitMap.CreateCompatibleBitmap(dcObj, screen_width, screen_height)
     cDC.SelectObject(dataBitMap)
-    cDC.BitBlt((0,0),(w, h) , dcObj, (0,0), SRCCOPY)
+    cDC.BitBlt((0,0),(screen_width, screen_height) , dcObj, (0,0), win32con.SRCCOPY)
 
     # save to bitmap
     dataBitMap.SaveBitmapFile(cDC, path_to_img)
-
-    # save to png
-    # bmpstr = dataBitMap.GetBitmapBits(True)
-    # img = Image.frombuffer(
-    #     'RGB',
-    #     (w,h),
-    #     bmpstr, 'raw', 'BGRX', 0, 1)
-    # img.save(path_to_img)
   
     # Free Resources
     dcObj.DeleteDC()
     cDC.DeleteDC()
-    ReleaseDC(hwnd, wDC)
-    DeleteObject(dataBitMap.GetHandle())
+    win32gui.ReleaseDC(hwnd, wDC)
+    win32gui.DeleteObject(dataBitMap.GetHandle())
 
-def dxcam_snap_save(path_to_img):
-    screenshot = camera.grab()
-    if screenshot is not None:
-        # Convert the numpy array to a Pillow image object
-        image = Image.fromarray(screenshot)
-        # Save the image as a PNG file to disk
-        image.save(path_to_img)
+def win32_snap_save_v2(path_to_img):
+    # get the primary display's device context
+    hwin = win32gui.GetDesktopWindow()
+    hwindc = win32gui.GetWindowDC(hwin)
+    srcdc = win32ui.CreateDCFromHandle(hwindc)
+    
+    # create a compatible memory device context where the screenshot will be stored
+    memdc = srcdc.CreateCompatibleDC()
+    width = win32api.GetSystemMetrics(win32con.SM_CXVIRTUALSCREEN)
+    height = win32api.GetSystemMetrics(win32con.SM_CYVIRTUALSCREEN)
+    bmp = win32ui.CreateBitmap()
+    bmp.CreateCompatibleBitmap(srcdc, width, height)
+    memdc.SelectObject(bmp)
+    
+    # copy the screen into the memory device context
+    memdc.BitBlt((0, 0), (width, height), srcdc, (0, 0), win32con.SRCCOPY)
+    
+    # save the screenshot to the given file path
+    bmp.SaveBitmapFile(memdc, path_to_img)
+    
+    # free up resources
+    memdc.DeleteDC()
+    win32gui.ReleaseDC(hwin, hwindc)
+    win32gui.DeleteObject(bmp.GetHandle())
+
+def win32_snap_save_v3(save_path):
+    # Grab a handle to the main desktop window
+    hdesktop = win32gui.GetDesktopWindow()
+
+    # Create a device context
+    desktop_dc = win32gui.GetWindowDC(hdesktop)
+    img_dc = win32ui.CreateDCFromHandle(desktop_dc)
+
+    # Create a memory-based device context
+    mem_dc = img_dc.CreateCompatibleDC()
+
+    # Create a bitmap object
+    screenshot = win32ui.CreateBitmap()
+    screenshot.CreateCompatibleBitmap(img_dc, screen_width, screen_height)
+    mem_dc.SelectObject(screenshot)
+
+    # Copy the screen to the memory-based device context
+    mem_dc.BitBlt((0, 0), (screen_width, screen_height), img_dc, (0, 0), win32con.SRCCOPY)
+
+    # Save the bitmap to a file
+    screenshot.SaveBitmapFile(mem_dc, save_path)
+
+    # Clean up
+    mem_dc.DeleteDC()
+    win32gui.DeleteObject(screenshot.GetHandle())
+    img_dc.DeleteDC()
+    win32gui.ReleaseDC(hdesktop, desktop_dc)
+
+# def dxcamnumpy_snap_save(path_to_img):
+#     screenshot = camera.grab()
+#     if screenshot is not None:
+#         MachineOperations().savetopkl(path_to_img[:-4]+".pkl", screenshot)
+        
+# def dxcam_snap_save(path_to_img):
+#     screenshot = camera.grab()
+#     if screenshot is not None:
+#         # Convert the numpy array to a Pillow image object
+#         image = Image.fromarray(screenshot)
+#         # Save the image as a PNG file to disk
+#         image.save(path_to_img)
 
 def snap_and_save(signal, detail, mode):
     # compose log message
@@ -388,6 +465,11 @@ def snap_and_save(signal, detail, mode):
     ss_path = PathOperations().create_path_string(FullPathElements.F1_SCREENSHOTS+[filename])
     # dxcam_snap_save(ss_path)
     # win32_snap_save(ss_path)
+    # win32_snap_save_v2(ss_path)
+    # win32_snap_save_v3(ss_path)
+    # mss_snap_save(ss_path)
+    # dxcamnumpy_snap_save(ss_path)
+
 
 def on_press(key):
     global lock
@@ -460,7 +542,7 @@ logging.basicConfig(filename=PathOperations().create_path_string(FullPathElement
 lock = True
 
 # turn on dxcam 
-camera = dxcam.create()
+# camera = dxcam.create()
 
 # Activate Listener
 with keyboard.Listener(on_press=on_press, on_release=on_release) as k_listener, mouse.Listener(on_move=on_move, on_click=on_click, on_scroll=on_scroll) as m_listener:
