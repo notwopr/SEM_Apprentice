@@ -2,7 +2,7 @@
 _SEM_Apprentice is the property of the authors and owners of SEM_Apprentice (Anudha Mittal and David Choi) and may not be distributed, copied, sold, or used without the express consent from them.  By using and/or possessing SEM_Apprentice code, you acknowledge and agree to these terms.  © 2023 Anudha Mittal and David Choi. All Rights Reserved._
 
 __WELCOME TO SEM_APPRENTICE!__ 
-![semapplogo](./semapprenticelogo_dalle2_readme.png)
+![semapplogo](./mikey_small.png)
 
 **WHAT DOES SEM APPRENTICE DO?**
 Thank you for participating with us on our mission to improve the SEM experience.  SEM Apprentice is a program you run in the background while you use your microscope software.  While SEM Apprentice is running, it records your mouse and keyboard actions and also takes screenshots of your activity.  This data is stored in a folder locally on your machine.  Our hope is to gather the data you've generated to help us train our AI models.  We hope that our AI models will someday in the near future be able to operate a SEM automatically!

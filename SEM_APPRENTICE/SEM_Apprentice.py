@@ -217,13 +217,15 @@ class UIOperations:
         button_color = "#00487c"
         prompt_font_color = "white"#"#3c0919"
         button_text_color = "white"
-
-        prompt_font = "default"
+        # FONTS
+        prompt_font = "Segoe UI Variable Small Semibold"
         prompt_font_size = 20
         prompt_font_style = "bold"
         button_font = "default"
         button_font_size = 20
         button_font_style = "bold"
+        # LOGO
+        logo = psg.EMOJI_BASE64_HAPPY_THUMBS_UP #f"{current_dir}/mikey_small.png" 
         
         
 
@@ -250,7 +252,7 @@ class UIOperations:
             ],
             [psg.Push(background_color=background_color_global),
              psg.Image(
-                psg.EMOJI_BASE64_HAPPY_THUMBS_UP,
+                logo,
                 pad=((5,35),(5,5)),
                 expand_x=False,
                 background_color=background_color_global,
