@@ -29,6 +29,10 @@ import struct
 # Get the path to the directory where the executable is located
 current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 
+if sys.platform.startswith('win'):
+    import ctypes
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(u'CompanyName.ProductName.SubProduct.VersionInformation') # Arbitrary string
+
 # Get path to directory enclosing this script
 # current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -207,43 +211,78 @@ class UIOperations:
         root = tk.Tk()
         root.withdraw()
 
-        background_color_global = "#9F9AA4"
+        # COLORS
+        background_color_global = "#0496FF"
+        sunken_background_color_global = "#027bce"
+        button_color = "#00487c"
+        prompt_font_color = "white"#"#3c0919"
+        button_text_color = "white"
+
+        prompt_font = "default"
+        prompt_font_size = 20
+        prompt_font_style = "bold"
+        button_font = "default"
+        button_font_size = 20
+        button_font_style = "bold"
+        
+        
 
         layout = [
-            [psg.Text(
-                title, 
-                font=('default', 20, "bold"),
-                # text_color='white', 
-                expand_x=True, 
-                pad=5, 
-                justification='center', 
-                background_color="#857e8b", 
-                relief='sunken'  # flat, groove, raised, ridge, solid, or sunken
-                )
+            # [psg.Text(
+            #     title, 
+            #     font=('default', 20, "bold"),
+            #     # text_color='white', 
+            #     expand_x=True, 
+            #     pad=5, 
+            #     justification='center', 
+            #     background_color="#857e8b", 
+            #     relief='sunken'  # flat, groove, raised, ridge, solid, or sunken
+            #     )
+            #     ],
+            [psg.VPush(background_color=background_color_global)],
+            [psg.Push(background_color=background_color_global),
+            #  psg.Image(
+            #     psg.EMOJI_BASE64_HAPPY_THUMBS_UP,
+            #     pad=(50,10,50,10),
+            #     expand_x=False, 
+            #     ),
+            psg.Push(background_color=background_color_global),
+            ],
+            [psg.Push(background_color=background_color_global),
+             psg.Image(
+                psg.EMOJI_BASE64_HAPPY_THUMBS_UP,
+                pad=((5,35),(5,5)),
+                expand_x=False,
+                background_color=background_color_global,
+
+                ),
+            psg.Text(
+                question,
+                font=(prompt_font, prompt_font_size, prompt_font_style),
+                text_color=prompt_font_color,
+                pad=((0,0),(0,0)), 
+                expand_x=False,
+                # justification='center', 
+                background_color=sunken_background_color_global,
+                # relief='sunken',
+                ),
+            psg.Push(background_color=background_color_global),
                 ],
-            [psg.Text(
-                question, 
-                font=('default', 10, "normal"),
-                # text_color='white',
-                pad=30, 
-                expand_x=True, 
-                justification='center', 
-                background_color=background_color_global
-                )
-                ],
+            [psg.VPush(background_color=background_color_global)],
             [psg.Push(background_color=background_color_global),
              psg.Yes(
-                # pad=5,
-                # button_color='black',
-                # font=('default', 20, "bold"),
+                pad=((0,30),(0,0)),
+                button_color=(button_text_color, button_color),
+                font=(button_font, button_font_size, button_font_style),
              ), 
              psg.No(
-                # pad=5,
-                # button_color='black',
-                # font=('default', 20, "bold"),
+                pad=((30,0),(0,0)),
+                button_color=(button_text_color, button_color),
+                font=(button_font, button_font_size, button_font_style),
              ), 
              psg.Push(background_color=background_color_global)
-             ]
+             ],
+             [psg.VPush(background_color=background_color_global)],
         ]
         window = psg.Window(
             title=title, 
@@ -259,6 +298,7 @@ class UIOperations:
             background_color=background_color_global,
             element_padding=None,
             margins=(0, 0, 0, 0),
+            icon='semapprenticelogo_dalle2.ico',
             )
         # root = window.TKroot
         event, _ = window.read()
@@ -464,7 +504,7 @@ def snap_and_save(signal, detail, mode):
     filename = f"{t.string_justnums}__{message_fileversion}.png"
     ss_path = PathOperations().create_path_string(FullPathElements.F1_SCREENSHOTS+[filename])
     # dxcam_snap_save(ss_path)
-    # win32_snap_save(ss_path)
+    win32_snap_save(ss_path)
     # win32_snap_save_v2(ss_path)
     # win32_snap_save_v3(ss_path)
     # mss_snap_save(ss_path)
@@ -483,7 +523,8 @@ def on_release(key):
     # if listener not suspended...
     if not lock: 
         # print('release') 
-        snap_and_save('RELEASED', key, 'keyboard')
+        # snap_and_save('RELEASED', key, 'keyboard')
+        pass
 
 def on_move(x, y):
     global lock
@@ -548,7 +589,7 @@ lock = True
 with keyboard.Listener(on_press=on_press, on_release=on_release) as k_listener, mouse.Listener(on_move=on_move, on_click=on_click, on_scroll=on_scroll) as m_listener:
 
     # Get User Confirmation to Begin Recording
-    start_record = UIOperations().yesno("SEM Apprentice", 'Hello!  Should I start recording?')
+    start_record = UIOperations().yesno("SEM Apprentice", 'Hello!  I am SEM Apprentice.\nDo you want me to start recording?')
 
     # If user confirms to begin recording...
     if start_record:
