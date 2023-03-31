@@ -21,17 +21,13 @@ import win32ui
 import win32con
 import win32api
 import pickle as pkl
-import dxcam
-from PIL import Image
+# import dxcam
+# from PIL import Image
 import ctypes
-import struct
+# import struct
 
 # Get the path to the directory where the executable is located
 current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-
-if sys.platform.startswith('win'):
-    import ctypes
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(u'CompanyName.ProductName.SubProduct.VersionInformation') # Arbitrary string
 
 # Get path to directory enclosing this script
 # current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -40,11 +36,6 @@ if sys.platform.startswith('win'):
 user32 = ctypes.windll.user32
 screen_width = user32.GetSystemMetrics(0)
 screen_height = user32.GetSystemMetrics(1)
-
-# Import the necessary Windows API functions and constants
-gdi32 = ctypes.windll.gdi32
-
-
 
 
 symbol_legend = {
@@ -221,7 +212,7 @@ class UIOperations:
         prompt_font = "Segoe UI Variable Small Semibold"
         prompt_font_size = 20
         prompt_font_style = "bold"
-        button_font = "default"
+        button_font = "Segoe UI Variable Small Semibold"
         button_font_size = 20
         button_font_style = "bold"
         # LOGO
@@ -568,7 +559,7 @@ def on_scroll(x, y, dx, dy):
 # Set constants
 start_message = "I am learning :D"
 end_message = "I stopped learning. Please come back soon :_)"
-copyright_block = "SEM_APPRENTICE\nVERSION: 2.1\n\nWELCOME TO SEM_APPRENTICE!\n\n** SEM_APPRENTICE IS THE PROPERTY OF THE AUTHORS AND OWNERS OF SEM_APPRENTICE (ANUDHA MITTAL and DAVID CHOI) AND MAY NOT BE DISTRIBUTED, COPIED, SOLD, OR USED WITHOUT THE EXPRESS CONSENT FROM THEM.\n**BY USING AND/OR POSSESSING SEM_APPRENTICE CODE, YOU ACKNOWLEDGE AND AGREE TO THESE TERMS.\n© 2023 ANUDHA MITTAL and DAVID CHOI.  ALL RIGHTS RESERVED."
+copyright_block = "SEM_APPRENTICE\nVERSION: 2.2\n\nWELCOME TO SEM_APPRENTICE!\n\n** SEM_APPRENTICE IS THE PROPERTY OF THE AUTHORS AND OWNERS OF SEM_APPRENTICE (ANUDHA MITTAL and DAVID CHOI) AND MAY NOT BE DISTRIBUTED, COPIED, SOLD, OR USED WITHOUT THE EXPRESS CONSENT FROM THEM.\n**BY USING AND/OR POSSESSING SEM_APPRENTICE CODE, YOU ACKNOWLEDGE AND AGREE TO THESE TERMS.\n© 2023 ANUDHA MITTAL and DAVID CHOI.  ALL RIGHTS RESERVED."
 
 """EXECUTABLES BELOW"""
 # Check Directories if present, if not, create them
