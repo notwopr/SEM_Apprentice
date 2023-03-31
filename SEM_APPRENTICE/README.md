@@ -39,6 +39,6 @@ Thank you again for choosing to participate with us and helping us make SEM life
 
 **VERSION INFO**
 Application: SEM Apprentice 
-Version: 2.1
+Version: 2.2.0.0
 
 _SEM_Apprentice is the property of the authors and owners of SEM_Apprentice (Anudha Mittal and David Choi) and may not be distributed, copied, sold, or used without the express consent from them.  By using and/or possessing SEM_Apprentice code, you acknowledge and agree to these terms.  © 2023 Anudha Mittal and David Choi.  All Rights Reserved._
