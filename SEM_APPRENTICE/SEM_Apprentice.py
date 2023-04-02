@@ -9,6 +9,7 @@ WELCOME TO SEM_APPRENTICE!
 import os
 import sys
 import re
+import io
 import datetime as dt
 from pathlib import Path
 import logging
@@ -16,15 +17,19 @@ import PySimpleGUI as psg
 import tkinter as tk
 from pynput import mouse
 from pynput import keyboard
+import queue
 import win32gui
 import win32ui
 import win32con
 import win32api
+import threading
+import win32console
 import pickle as pkl
 # import dxcam
 # from PIL import Image
 import ctypes
 # import struct
+import time
 
 # Get the path to the directory where the executable is located
 current_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -168,7 +173,7 @@ class MachineOperations:
     def create_nonexistent_directory(self, path_to_dir: str):
         '''# CREATE DIRECTORY IF DOESN'T EXIST'''
 
-        print('\n')
+        # print('\n')
         print(f'Checking whether directory {path_to_dir} exists...')
 
         if not self.check_if_directory_is_directory(path_to_dir):
@@ -183,7 +188,9 @@ class MachineOperations:
             pkl.dump(filedata, targetfile, protocol=4)
 
 
-
+# set parameters for dialog box width
+yesno_width = 715
+yesno_height = 300
 class UIOperations:
     # OLD TKINTER MESSAGEBOX METHOD
     # def yesno(self, title, question):
@@ -285,13 +292,13 @@ class UIOperations:
             keep_on_top=True,
             finalize=True,
             grab_anywhere=False,
+            grab_anywhere_using_control=False,
             disable_minimize=True,
             disable_close=True,
-            size=(715, 300),
+            size=(yesno_width, yesno_height),
             background_color=background_color_global,
             element_padding=None,
             margins=(0, 0, 0, 0),
-            icon='semapprenticelogo_dalle2.ico',
             )
         # root = window.TKroot
         event, _ = window.read()
@@ -329,7 +336,7 @@ def build_directories():
     alldirs = [attr for attr in dir(f) 
               if not attr.startswith('__')]
     alldirs.sort()
-    print("\n")
+    # print("\n")
     print("Checking existence of the following directories...")
     print(alldirs)
 
@@ -555,55 +562,153 @@ def on_scroll(x, y, dx, dy):
             # if chose 'No', then resume listening
             lock = False  
 
+# Create the PySimpleGUI window
+layout = [[psg.Multiline(
+    size=(75,15), 
+    key='-OUTPUT-', 
+    autoscroll=True,
+    background_color='black',
+    text_color='white',
+    # auto_refresh=True,
+    do_not_clear=True,
+    no_scrollbar=True,
+    font=(""),
+    )]]
+window = psg.Window(
+    title='Console Output',
+    layout=layout,
+    relative_location=((yesno_width/2)+300,0),
+    margins=(0,0),
+    element_padding=0,
+    border_depth=0,
+    no_titlebar=True,
+    grab_anywhere=True,
+    disable_close=True,
+    disable_minimize=False,
+    icon=f"{current_dir}/mikey.ico",
+    finalize=True,
+    )
 
-# Set constants
-start_message = "I am learning :D"
-end_message = "I stopped learning. Please come back soon :_)"
-copyright_block = "SEM_APPRENTICE\nVERSION: 2.2\n\nWELCOME TO SEM_APPRENTICE!\n\n** SEM_APPRENTICE IS THE PROPERTY OF THE AUTHORS AND OWNERS OF SEM_APPRENTICE (ANUDHA MITTAL and DAVID CHOI) AND MAY NOT BE DISTRIBUTED, COPIED, SOLD, OR USED WITHOUT THE EXPRESS CONSENT FROM THEM.\n**BY USING AND/OR POSSESSING SEM_APPRENTICE CODE, YOU ACKNOWLEDGE AND AGREE TO THESE TERMS.\n© 2023 ANUDHA MITTAL and DAVID CHOI.  ALL RIGHTS RESERVED."
+# Define a method to continuously update the window with output from the queue
+def update_window(window, queue, lock):
+    while True:
+        try: 
+            newtext = queue.get()
+            # Update the window with any new output
+            if newtext:
+                with lock:
+                    window['-OUTPUT-'].print(newtext)
+        except queue.empty():
+            pass
 
-"""EXECUTABLES BELOW"""
-# Check Directories if present, if not, create them
-print("\n")
-print("\n")
-print(copyright_block)
+# Define a custom class for standard output and error output
+class CustomOutput:
+    def __init__(self, queue):
+        self.queue = queue
 
-build_directories()
+    def write(self, s):
+        self.queue.put(s)
+        self.queue.task_done()
 
-# Activate Logger (using the custom Formatter to later store created log message to variable)
-logging.basicConfig(filename=PathOperations().create_path_string(FullPathElements.F1_LOGS + [FileNames().FN_LOG]), level=logging.INFO, format='%(message)s', force =True)
+class CustomStream(io.StringIO):
+    def __init__(self, queue):
+        super().__init__()
+        self.queue = queue
 
-# Suspend listener
-lock = True
+    def write(self, *args, **kwargs):
+        super().write(*args, **kwargs)
+        self.queue.put(self.getvalue())
 
-# turn on dxcam 
-# camera = dxcam.create()
+def main(sys, output_queue):
+    
+    # display title info and copyright
+    for b in copyright_block:
+        print(b)
 
-# Activate Listener
-with keyboard.Listener(on_press=on_press, on_release=on_release) as k_listener, mouse.Listener(on_move=on_move, on_click=on_click, on_scroll=on_scroll) as m_listener:
+    # build directories if not present
+    build_directories()
 
-    # Get User Confirmation to Begin Recording
-    start_record = UIOperations().yesno("SEM Apprentice", 'Hello!  I am SEM Apprentice.\nDo you want me to start recording?')
+    # Activate Logger (using the custom Formatter to later store created log message to variable)
+    logging.basicConfig(filename=PathOperations().create_path_string(FullPathElements.F1_LOGS + [FileNames().FN_LOG]), level=logging.INFO, format='%(message)s', force =True)
+    
+    # turn on dxcam 
+    # camera = dxcam.create()
+    
+    # Activate Listener
+    with keyboard.Listener(on_press=on_press, on_release=on_release) as k_listener, mouse.Listener(on_move=on_move, on_click=on_click, on_scroll=on_scroll) as m_listener:
+        # Create a separate instance of CustomOutput that uses the main queue
+        main_output = CustomOutput(output_queue)
+        # Redirect console output to the main output queue
+        sys.stdout = main_output
+        sys.stderr = main_output
 
-    # If user confirms to begin recording...
-    if start_record:
+        # Get User Confirmation to Begin Recording
+        start_record = UIOperations().yesno("SEM Apprentice", 'Hello!  I am SEM Apprentice.\nDo you want me to start recording?')
+        
+        # If user confirms to begin recording...
+        if start_record:
 
-        # Resume listening
-        lock = False
-        # Log start of session
-        gen_log_msg(start_message)
+            # Resume listening
+            global lock
+            lock = False
 
-        # Notify User of SEMBot Apprentice beginning recording
-        print('\n')
-        print(start_message)
-        m_listener.join()
+            # add start message to log
+            gen_log_msg(start_message)
 
-        # Log end of session
-        gen_log_msg(end_message)
+            # notify user of start
+            # print('\n')
+            print(start_message)
 
-        # Notify User of SEMBot Apprentice Termination
-        print('\n')
-        print(end_message)
-        print('\n')
-        sys.exit()  # must exit because keyboard listener is still active
-    else:
-        sys.exit()
+            # terminate mouse listener
+            m_listener.join()
+
+            # add end message to log
+            gen_log_msg(end_message)
+            # notify user of end
+            # print('\n')
+            print(end_message)
+            # time.sleep(3)
+        else:
+            # notify user of end
+            # print('\n')
+            print(abort_message)
+            time.sleep(3)
+
+
+if __name__ == '__main__':
+    # Set constants
+    start_message = "I am learning :D"
+    end_message = "I stopped learning. Please come back soon :_)"
+    abort_message = "I understand. There is always next time :)"
+    copyright_block = [
+        "SEM_APPRENTICE",
+        "VERSION: 2.2",
+        "WELCOME TO SEM_APPRENTICE!",
+        "** SEM_APPRENTICE IS THE PROPERTY OF THE AUTHORS AND OWNERS OF SEM_APPRENTICE (ANUDHA MITTAL and DAVID CHOI) AND MAY NOT BE DISTRIBUTED, COPIED, SOLD, OR USED WITHOUT THE EXPRESS CONSENT FROM THEM.", 
+        "** BY USING AND/OR POSSESSING SEM_APPRENTICE CODE, YOU ACKNOWLEDGE AND AGREE TO THESE TERMS.", 
+        "© 2023 ANUDHA MITTAL and DAVID CHOI.  ALL RIGHTS RESERVED."
+        ]
+
+    # Create a queue to store the console output
+    output_queue = queue.Queue()
+
+    # create a lock object for protecting stdout
+    stdout_lock = threading.Lock()
+
+    # Redirect console output to the custom output class
+    sys.stdout = CustomOutput(output_queue)
+    sys.stderr = CustomOutput(output_queue)
+
+    # sys.stdout = CustomStream(output_queue)
+    # sys.stderr = CustomStream(output_queue)
+    # Start the update_window() method in a separate thread
+    window_thread = threading.Thread(target=update_window, args=(window, output_queue, stdout_lock), daemon=True)
+    window_thread.start()
+    
+    # Suspend listener
+    lock = True
+
+    # run program
+    main(sys, output_queue)
+    window_thread.join()
+    sys.exit()  # must exit because keyboard listener is still active
