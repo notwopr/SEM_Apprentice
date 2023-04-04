@@ -92,8 +92,9 @@ class Window:
             )
         
 class Welcome(Window):
-    def __init__(self, current_dir):
+    def __init__(self, copyright):
         self.greeting = "Hi! I am SEM Apprentice.  Welcome :)"
+        self.copyright = copyright
     
         # WINDOW CONTENTS
         self.layout = [
@@ -119,21 +120,34 @@ class Welcome(Window):
                     text_color=self.prompt_font_color,
                     pad=((0,0),(0,0)), 
                     expand_x=False,
-                    # justification='center', 
                     background_color=self.sunken_background_color_global,
-                    # relief='sunken',
                     ),
                 psg.Push(background_color=self.background_color_global),
             ],
             # MIDDLE VERTICAL SPACER
             [psg.VPush(background_color=self.background_color_global)],
-            # YES OR NO BUTTON ROW
+            # MAIN CONTENT
+            [   
+                psg.Push(background_color=self.background_color_global),
+                psg.Text(
+                    '\n'.join(self.copyright),
+                    text_color=self.sunken_background_color_global,
+                    background_color=self.background_color_global,
+                    font=("default", 10, "bold"),
+                    size=(70,9),
+                    ),
+                psg.Push(background_color=self.background_color_global),
+                ],
+            [psg.VPush(background_color=self.background_color_global)],
             [   psg.Push(background_color=self.background_color_global),
                 psg.Multiline(
-                    size=(80,15),
+                    pad=((0,0),(5,0)),
+                    size=(80,5),
                     autoscroll=True,
-                    background_color='black',
-                    text_color='white',
+                    background_color=self.background_color_global,
+                    text_color=self.sunken_background_color_global,
+                    font=("default", 10, "bold"),
+                    border_width=0,
                     auto_refresh=True,
                     reroute_stdout=True,
                     do_not_clear=True,
@@ -160,12 +174,11 @@ class Welcome(Window):
             background_color=self.background_color_global,
             element_padding=None,
             margins=(0, 0, 0, 0),
-            icon=f"{current_dir}/mikey.ico",
             )
 
 class Status(Window):
     
-    def __init__(self, message, current_dir):
+    def __init__(self, message):
         self.message = message
     
         # WINDOW CONTENTS
@@ -216,9 +229,8 @@ class Status(Window):
             background_color=self.background_color_global,
             element_padding=None,
             margins=(0, 0, 0, 0),
-            icon=f"{current_dir}/mikey.ico",
             auto_close=True,
-            auto_close_duration=1,
+            auto_close_duration=1.1,
             )    
 
 

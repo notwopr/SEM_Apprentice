@@ -17,6 +17,7 @@ class KBMListener:
             if x<2 and y<2:
                 # suspend all listener activity
                 self.listener_pause = True
+                self.sem_apprentice.pause_queue.put("pause")
 
     def on_press(self, key):
         # if listener not suspended...
