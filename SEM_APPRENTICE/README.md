@@ -11,7 +11,7 @@ Thank you for participating with us on our mission to improve the SEM experience
 **DATA PRIVACY**
 We understand that you may be concerned about releasing your data to us.  Your participation in this mission is completely voluntary.  
 
-If you are at all concerned about the data being recorded, you may review the data yourself and decide whether to withhold or release any or all of the data to us.  You can find any recorded data in the SEMBOT_DATA folder which will be found in the same folder as this README file.  If there is no folder, that means no data has been collected.
+If you are at all concerned about the data being recorded, you may review the data yourself and decide whether to withhold or release any or all of the data to us.  You can find any recorded data in the SEMBOT_DATA folder which will be found in the same folder as this README file.
 
 You have the right to not release to us any or all data recorded.
 
@@ -28,7 +28,7 @@ To run, simply double-click the EXE file.  It is recommended you have your micro
 
 You may stop SEM Apprentice at any point in time by simply moving your mouse cursor to the upper-left-hand corner of your screen and scrolling either up or down.  You will then get a prompt to confirm termination.
 
-You may start and stop the program as many times as you like.  SEM Apprentice will keep a record of all recording sessions and will store all data generated in the SEMBOT_DATA folder located in the same directory as this README and EXE files.  If there is no folder, that means no data has been recorded.
+You may start and stop the program as many times as you like.  SEM Apprentice will keep a record of all recording sessions and will store all data generated in the SEMBOT_DATA folder located in the same directory as this README and EXE files.
 
 When you have finished generating the training data you wish to share, you may want to review the data generated in the SEMBOT_DATA folder to resolve any data privacy concerns you may have before releasing the folder to us.  When you are ready to release your data to us, let us know!
 

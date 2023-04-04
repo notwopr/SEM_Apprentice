@@ -1,5 +1,5 @@
 import PySimpleGUI as psg
-    
+
 class Window:
     """class attributes"""
     # DIALOG BOX DIMENSIONS

@@ -24,11 +24,11 @@ from ui_operations import UIOperations
 from machine_operations import MachineOperations
 from window_design import Welcome, Status
 
+
 class SEM_Apprentice:
 
     def __init__(self):
         self.root = tk.Tk()
-        self.root.withdraw()
         self.pause_queue = queue.Queue()
         self.listener = KBMListener(self)
         self.ui = UIOperations(self, self.listener)
@@ -148,4 +148,19 @@ class SEM_Apprentice:
 
 if __name__ == '__main__':
     app = SEM_Apprentice()
+    # code to make sure icon file is packaged inside EXE file and call from inside the EXE instead of looking for it outside.
+    datafile = 'D:\SEM_Apprentice\SEM_APPRENTICE\mikey.ico'
+    if not hasattr(sys, "frozen"):
+        datafile = os.path.join(os.path.dirname(__file__), datafile)
+    else:
+        datafile = os.path.join(sys.prefix, datafile)
+    def resource_path(relative_path):    
+        try:       
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+
+        return os.path.join(base_path, relative_path)
+    app.root.iconbitmap(default=resource_path(datafile))
+    app.root.iconify()
     app.run()
