@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-import pickle as pkl
 import time
 from filesys_nomenclature import FullPathElements
 from path_operations import PathOperations
@@ -46,7 +45,3 @@ class MachineOperations:
         for d in alldirs:
             pathstring = PathOperations().create_path_string(getattr(f, d))
             MachineOperations().create_nonexistent_directory(pathstring)
-
-    def savetopkl(self, filepath: str, filedata):
-        with open(Path(filepath), "wb") as targetfile:
-            pkl.dump(filedata, targetfile, protocol=4)

@@ -14,6 +14,7 @@ import time
 import datetime as dt
 import re
 import queue
+from multiprocessing import Manager, Process, freeze_support
 # LOCAL IMPORTS
 from path_operations import PathOperations
 from filesys_nomenclature import FileNames, FullPathElements
@@ -23,7 +24,7 @@ from kbm_listener import KBMListener
 from ui_operations import UIOperations
 from machine_operations import MachineOperations
 from window_design import Welcome, Status
-
+from bmptopng_cv2 import check_queue_for_bmp
 
 class SEM_Apprentice:
 
@@ -42,13 +43,17 @@ class SEM_Apprentice:
         self.screen_height = self.user32.GetSystemMetrics(1)
         # Load snap shot resources
         self.snapshot = SnapShotMethods(self.screen_width, self.screen_height)
+        # Initialize a queue to manage the conversion process
+        self.convert_queue = Manager().Queue()
+        # Start the conversion process in a separate process
+        self.convert_processor = Process(target=check_queue_for_bmp, args=(self.convert_queue,))
         # Set Message Constants
         self.start_message = "I am learning :D"
         self.end_message = "I stopped learning. Please come back soon :_)"
         self.abort_message = "I understand. There is always next time :)"
         self.copyright_block = [
             "SEM_APPRENTICE",
-            "VERSION: 2.3.0.0",
+            "VERSION: 0.4.0",
             "WELCOME TO SEM_APPRENTICE!",
             "** SEM_APPRENTICE IS THE PROPERTY OF THE AUTHORS AND OWNERS OF SEM_APPRENTICE (ANUDHA MITTAL and DAVID CHOI) AND MAY NOT BE DISTRIBUTED, COPIED, SOLD, OR USED WITHOUT THE EXPRESS CONSENT FROM THEM.", 
             "** BY USING AND/OR POSSESSING SEM_APPRENTICE CODE, YOU ACKNOWLEDGE AND AGREE TO THESE TERMS.", 
@@ -71,6 +76,8 @@ class SEM_Apprentice:
             self.gen_log_msg(self.end_message)
             end_window = Status(self.end_message).window
             end_window.read()
+            self.convert_queue.put("STOP RECORDING")
+            self.convert_processor.join()
             sys.exit()
         self.listener.listener_pause = False
 
@@ -84,35 +91,37 @@ class SEM_Apprentice:
         start_window = Status(self.start_message).window
         start_window.read()
         
-        # start listeners
+        # start convert processor
+        self.convert_processor.start()
+
+        # start kbm listeners
         self.listener.start()
 
         while True:
             try:
                 # Wait for message in queue
                 message = self.pause_queue.get(timeout=0.1)
-
+            except queue.Empty:
+                pass
+            else:
                 # If message is "stop", run confirm_stop_recording function
                 if message == "pause":
                     self.confirm_stop_recording()
                 
                 # Mark task as done
                 self.pause_queue.task_done()
-            except queue.Empty:
-                pass
                 
-
     def prepare(self):
         MachineOperations().build_directories(self.current_dir)
 
     def splash_welcome(self):
-        # Save a reference to the original stdout
+        # Save a reference to the original stdout - this is so that stdout can return to console window
         original_stdout = sys.stdout
         welcome_window = Welcome(self.copyright_block).window
         self.prepare()
         time.sleep(3)
         welcome_window.close()
-        # Reset stdout to the original value
+        # Reset stdout to the original value - this is so that stdout can return to console window
         sys.stdout = original_stdout
 
     def run(self):
@@ -140,14 +149,21 @@ class SEM_Apprentice:
         ts_string = self.gen_log_msg(message)
 
         # format filename
-        filename = f"{ts_string}__{message_fileversion}.png"
+        filename = f"{ts_string}__{message_fileversion}.bmp"
         ss_path = PathOperations().create_path_string(FullPathElements(self.current_dir).F1_SCREENSHOTS+[filename])
 
         # save to disk
         self.snapshot.win32_snap_save(ss_path)
 
+        # Add the BMP filepath to the queue for conversion
+        self.convert_queue.put(ss_path)
+
 if __name__ == '__main__':
+    # this is needed because otherwise running the compiled EXE version causes it to open an infinite number of copies of SEM Apprentice crashing the program.
+    freeze_support()
+
     app = SEM_Apprentice()
+
     # code to make sure icon file is packaged inside EXE file and call from inside the EXE instead of looking for it outside.
     datafile = 'D:\SEM_Apprentice\SEM_APPRENTICE\mikey.ico'
     if not hasattr(sys, "frozen"):
@@ -159,8 +175,9 @@ if __name__ == '__main__':
             base_path = sys._MEIPASS
         except Exception:
             base_path = os.path.abspath(".")
-
         return os.path.join(base_path, relative_path)
     app.root.iconbitmap(default=resource_path(datafile))
     app.root.iconify()
+    
+    # run SEM Apprentice
     app.run()

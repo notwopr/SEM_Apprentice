@@ -1,9 +1,4 @@
-numpy
-wheel
-pillow
 pynput
-pyautogui
 pywin32
-dxcam
 pysimplegui
-
+opencv-python

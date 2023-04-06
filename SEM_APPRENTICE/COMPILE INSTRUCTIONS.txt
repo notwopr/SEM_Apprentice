@@ -1,0 +1,32 @@
+COMPILE INSTRUCTIONS:
+
+To properly compile SEM Apprentice into an EXE file do the following:
+
+1. Go to folder containing the SEM Apprentice python scripts.
+
+2. Remove all files and folders pertaining to previous pyinstaller compilations.
+	a. Delete existing 'dist' folder.
+	b. Delete existing 'build' folder.
+	c. Delete SEM_Apprentice.spec
+	d. Delete versionfile.txt
+
+3. Create new versionfile.txt.  This file is needed by pyinstaller to populate the details tab in the Properties window when you right-click the EXE for more info.
+	a. Open create_versioninfofile.py in editor.
+	b. Update any parameters, including correct version number.
+	c. Run it.  This will create a new versionfile.txt.
+	d. Find the newly created versionfile.txt
+	e. Move it into the same folder as the SEM Apprentice python scripts.
+
+4. Open terminal in the folder location of SEM_Apprentice.py
+5. Make sure you are in the same directory as SEM_Apprentice.py
+6. Run the following: 
+
+pyinstaller --clean --onefile --noconsole --icon mikey.ico --version-file=versionfile.txt SEM_Apprentice.py
+
+7. Make it Presentable
+	a. The newly compiled SEM_Apprentice.exe is in the 'dist' folder.
+	b. Copy the README.HTML file and paste a copy in the dist folder.
+	c. Rename 'dist' to 'SEM Apprentice v.{whatever version #}'
+	d. Zip the folder.
+	e. Add zip file to the Builds folder.
+	f. commit changes to repo to save the new build to the repo.
