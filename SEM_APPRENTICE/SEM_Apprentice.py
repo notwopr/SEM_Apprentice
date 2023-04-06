@@ -165,7 +165,7 @@ if __name__ == '__main__':
     app = SEM_Apprentice()
 
     # code to make sure icon file is packaged inside EXE file and call from inside the EXE instead of looking for it outside.
-    datafile = 'D:\SEM_Apprentice\SEM_APPRENTICE\mikey.ico'
+    datafile = f'{app.current_dir}\mikey.ico'
     if not hasattr(sys, "frozen"):
         datafile = os.path.join(os.path.dirname(__file__), datafile)
     else:
