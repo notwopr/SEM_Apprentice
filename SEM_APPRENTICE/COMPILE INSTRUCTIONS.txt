@@ -23,7 +23,17 @@ To properly compile SEM Apprentice into an EXE file do the following:
 
 pyinstaller --clean --onefile --noconsole --icon mikey.ico --version-file=versionfile.txt SEM_Apprentice.py
 
-7. Make it Presentable
+7. Re-compile it again but this time with a modified .spec file to make sure icon is stored in the exe file.
+	a. When you compile the app, it creates a .spec file in the same folder as the original scripts.
+	b. Open the SEM_Apprentice.spec file in your editor and make the following changes:
+		(1) Under Analysis(), change "datas=[]," to "datas=[('mikey.ico', '.')],"
+		(2) Under EXE()... 
+			(a)  change "a.binaries," to "a.binaries + [('mikey.ico', 'D:\SEM_Apprentice\SEM_APPRENTICE\mikey.ico', 'DATA')],"
+			(b) change "icon=['mikey.ico']," to "icon='mikey.ico',"
+	c. Delete the old 'dist' and 'builds' folders and run the following:
+	pyinstaller SEM_Apprentice.spec
+
+8. Make it Presentable
 	a. The newly compiled SEM_Apprentice.exe is in the 'dist' folder.
 	b. Copy the README.HTML file and paste a copy in the dist folder.
 	c. Rename 'dist' to 'SEM Apprentice v.{whatever version #}'
