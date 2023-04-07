@@ -30,7 +30,7 @@ class MachineOperations:
     
     def build_directories(self, current_dir):
     
-        # get sorted list of all SEMBot Directories to build
+        # get sorted list of all SEM Apprentice Directories to build
         f = FullPathElements(current_dir)
         alldirs = [attr for attr in dir(f) 
                 if not attr.startswith('__')]
