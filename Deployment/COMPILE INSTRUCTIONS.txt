@@ -4,7 +4,8 @@ To properly compile SEM Apprentice into an EXE file do the following:
 
 1. Make sure all references to the current version number are correct.
 	a. Check SEM_Apprentice.py
-		(1) go to "self.copyright_block" variable.  There you'll find the field to change the version number.
+		(1) Open SEM_Apprentice.py in editor.
+		(2) Go to "self.copyright_block" variable.  There you'll find the field to change the version number.
 	b. Create new versionfile.txt.  
 		(1) This file is needed by pyinstaller to populate the details tab in the Properties window when you right-click the EXE for more info.
 		(2) Open create_versioninfofile.py in editor.
@@ -14,7 +15,7 @@ To properly compile SEM Apprentice into an EXE file do the following:
 	c. Update README.md
 	d. Update README.HTML
 
-2. Remove all files and folders pertaining to previous pyinstaller compilations.
+2. Remove previous pyinstaller compilations.
 	a. Delete existing 'dist' folder.
 	b. Delete existing 'build' folder.
 
