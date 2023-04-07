@@ -24,7 +24,7 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries + [('mikey.ico', 'D:\SEM_Apprentice\SEM_APPRENTICE\mikey.ico', 'DATA')],
+    a.binaries,
     a.zipfiles,
     a.datas,
     [],
@@ -42,5 +42,5 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     version='versionfile.txt',
-    icon='mikey.ico',
+    icon=['mikey.ico'],
 )

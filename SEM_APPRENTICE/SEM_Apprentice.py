@@ -53,7 +53,7 @@ class SEM_Apprentice:
         self.abort_message = "I understand. There is always next time :)"
         self.copyright_block = [
             "SEM_APPRENTICE",
-            "VERSION: 0.4.0",
+            "VERSION: 2.5.0.0",
             "WELCOME TO SEM_APPRENTICE!",
             "** SEM_APPRENTICE IS THE PROPERTY OF THE AUTHORS AND OWNERS OF SEM_APPRENTICE (ANUDHA MITTAL and DAVID CHOI) AND MAY NOT BE DISTRIBUTED, COPIED, SOLD, OR USED WITHOUT THE EXPRESS CONSENT FROM THEM.", 
             "** BY USING AND/OR POSSESSING SEM_APPRENTICE CODE, YOU ACKNOWLEDGE AND AGREE TO THESE TERMS.", 
@@ -164,19 +164,16 @@ if __name__ == '__main__':
 
     app = SEM_Apprentice()
 
-    # code to make sure icon file is packaged inside EXE file and call from inside the EXE instead of looking for it outside.
-    datafile = f'{app.current_dir}\mikey.ico'
-    if not hasattr(sys, "frozen"):
-        datafile = os.path.join(os.path.dirname(__file__), datafile)
+    # code to make sure icon file is found.
+    iconfn = 'mikey.ico'
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        # goes here if running this from a pyinstaller.exe file
+        path_to_icon = os.path.join(os.path.dirname(__file__), iconfn)
+        print(iconfn)
     else:
-        datafile = os.path.join(sys.prefix, datafile)
-    def resource_path(relative_path):    
-        try:       
-            base_path = sys._MEIPASS
-        except Exception:
-            base_path = os.path.abspath(".")
-        return os.path.join(base_path, relative_path)
-    app.root.iconbitmap(default=resource_path(datafile))
+        # goes here if running this python script directly
+        path_to_icon = os.path.join(os.path.dirname(__file__), iconfn)
+    app.root.iconbitmap(default=path_to_icon)
     app.root.iconify()
     
     # run SEM Apprentice

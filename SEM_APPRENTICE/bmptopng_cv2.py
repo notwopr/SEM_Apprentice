@@ -5,7 +5,7 @@ def bmp_to_png_cv(source, destination):
     # Load BMP file
     bmp_image = cv2.imread(source)
     # Save as PNG
-    cv2.imwrite(destination, bmp_image)
+    cv2.imwrite(destination, bmp_image, [int(cv2.IMWRITE_PNG_STRATEGY), int(cv2.IMWRITE_PNG_STRATEGY_DEFAULT)])
     # remove original BMP
     os.remove(source)
 
