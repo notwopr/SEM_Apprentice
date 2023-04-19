@@ -96,8 +96,8 @@ class Window:
             )
         
 class Welcome(Window):
-    def __init__(self, copyright):
-        self.greeting = "Hi! I am SEM Apprentice.  Welcome :)"
+    def __init__(self, greeting, copyright):
+        self.greeting = greeting
         self.copyright = copyright
     
         # WINDOW CONTENTS

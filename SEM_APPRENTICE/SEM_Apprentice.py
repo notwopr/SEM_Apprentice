@@ -48,6 +48,7 @@ class SEM_Apprentice:
         self.start_message = "I am learning :D"
         self.end_message = "I stopped learning. Please come back soon :_)"
         self.abort_message = "I understand. There is always next time :)"
+        self.greeting = "Hi! I am SEM Apprentice.  Welcome :)"
         self.copyright_block = [
             "SEM_APPRENTICE",
             "VERSION: 2.5.0.0",
@@ -114,7 +115,7 @@ class SEM_Apprentice:
     def splash_welcome(self):
         # Save a reference to the original stdout - this is so that stdout can return to console window
         original_stdout = sys.stdout
-        welcome_window = Welcome(self.copyright_block).window
+        welcome_window = Welcome(self.greeting, self.copyright_block).window
         self.prepare()
         time.sleep(3)
         welcome_window.close()
