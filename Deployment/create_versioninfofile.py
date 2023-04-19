@@ -6,7 +6,7 @@ import pyinstaller_versionfile
 
 pyinstaller_versionfile.create_versionfile(
     output_file="./SEM_APPRENTICE/versionfile.txt",
-    version="2.5.0.0",
+    version="2.5.1.0",
     company_name="Anudha Mittal and David Choi",
     file_description="SEM Apprentice",
     legal_copyright="© 2023 Anudha Mittal and David Choi. All rights reserved.",

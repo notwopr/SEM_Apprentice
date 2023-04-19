@@ -51,7 +51,7 @@ class SEM_Apprentice:
         self.greeting = "Hi! I am SEM Apprentice.  Welcome :)"
         self.copyright_block = [
             "SEM_APPRENTICE",
-            "VERSION: 2.5.0.0",
+            "VERSION: 2.5.1.0",
             "WELCOME TO SEM_APPRENTICE!",
             "** SEM_APPRENTICE IS THE PROPERTY OF THE AUTHORS AND OWNERS OF SEM_APPRENTICE (ANUDHA MITTAL and DAVID CHOI) AND MAY NOT BE DISTRIBUTED, COPIED, SOLD, OR USED WITHOUT THE EXPRESS CONSENT FROM THEM.", 
             "** BY USING AND/OR POSSESSING SEM_APPRENTICE CODE, YOU ACKNOWLEDGE AND AGREE TO THESE TERMS.", 
